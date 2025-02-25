@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Error</title>
+    <style>
+        :root {
+            --primary-green: #00ff00;
+            --secondary-green: #00cc00;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --border-color: #2a2a2a;
+            --hover-bg: #2c2c2c;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            text-align: center;
+            padding: 50px;
+        }
+        .error-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            border: 1px solid var(--border-color);
+        }
+        h1 {
+            color: var(--primary-green);
+        }
+        p {
+            color: var(--secondary-green);
+        }
+        .redirect-button {
+            background-color: var(--primary-green);
+            color: var(--text-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .redirect-button:hover {
+            background-color: var(--secondary-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>Password Error</h1>
+        <p>Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.</p>
+        <a href="{% url 'signup' %}">
+            <button class="redirect-button">Go to Signup Page</button>
+        </a>
+    </div>
+</body>
+</html>

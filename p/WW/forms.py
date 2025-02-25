@@ -34,8 +34,8 @@ class IncomeForm(forms.ModelForm):
 
     def save(self, commit=True, user=None):
         instance = super().save(commit=False)
-        instance.emoji = self.cleaned_data['source'].split()[0]  # Extract emoji
-        instance.source = self.cleaned_data['source']  # Store full text (emoji + name)
+        instance.emoji = self.cleaned_data['source'].split()[0]  
+        instance.source = self.cleaned_data['source'] 
         if user:
             instance.user = user
         if commit:

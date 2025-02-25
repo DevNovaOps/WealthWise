@@ -6,6 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wealth Wise - Login/Signup</title>
     <link rel="stylesheet" href="{% static 'signup.css' %}">
+    <style>
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-left:50px;
+            font-size:20px;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the icon */
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 10px;
+            text-align: justify;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
     <div class="background">
@@ -22,13 +55,21 @@
             </form>
         </div>
         <div class="form-container signup">
-            <form class="form" method="POST">
-                {% csrf_token %}
-                <h1>Create Account</h1>
-                {{signup_form.as_p}}
-                <button type="submit" name="signup">Create Account</button>
-               
-            </form>
+            {% if not error_in_criteria %}
+                <form class="form" method="POST">
+                  
+                    {% csrf_token %}
+                    <div>
+                    <h1>Create Account  <div class="tooltip">
+                        <span >?</span>
+                        <span class="tooltiptext">Password must be 8 characters long and contain at least 1 capital letter, 1 number, 1 special symbol, and 1 small letter.</span>
+                    </div>
+                </div></h1>
+                       
+                    {{signup_form.as_p}}
+                    <button type="submit" name="signup">Create Account</button>
+                </form>
+            {% endif %}
         </div>
         <div class="overlay">
             <div class="overlay-content">
@@ -81,5 +122,3 @@
     </script>
 </body>
 </html>
-
-

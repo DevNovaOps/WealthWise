@@ -4,42 +4,54 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from .forms import SignupForm, LoginForm, ForgotPasswordForm, IncomeForm, ExpenseForm
 from .models import User, Income, Expense
+import re
+import time
 
 def home(request):
     return render(request, 'WW/home.html')
 
 def signup(request):
-    if request.session.get('user_id'): 
+    if request.session.get('user_id'):
         messages.info(request, 'You are already logged in.')
         return redirect('home')
     login_form = LoginForm()
     signup_form = SignupForm()
 
     if request.method == 'POST':
-        if 'login' in request.POST: 
+        if 'login' in request.POST:
             login_form = LoginForm(request.POST)
             if login_form.is_valid():
                 email = login_form.cleaned_data['email']
                 password = login_form.cleaned_data['password']
                 try:
                     user = User.objects.get(email=email)
-                  
                     if check_password(password, user.password):
-                        request.session['user_id'] = user.id 
-                        return redirect('signup') 
+                        request.session['user_id'] = user.id
+                        return redirect('home')
                     else:
                         login_form.add_error('password', 'Incorrect password.')
                 except User.DoesNotExist:
                     login_form.add_error('email', 'User does not exist.')
+            else:
+                for field in login_form.errors:
+                    messages.error(request, f"{field}: {login_form.errors[field]}")
 
-        elif 'signup' in request.POST: 
+        elif 'signup' in request.POST:
             signup_form = SignupForm(request.POST)
             if signup_form.is_valid():
-                user = signup_form.save(commit=False)
-                user.password = make_password(signup_form.cleaned_data['password'])
-                user.save()
-                messages.success(request, "Account created successfully. Please log in.")
-                return redirect('signup')  
+                password = signup_form.cleaned_data['password']
+                if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', password):
+                    signup_form.add_error('password', 'Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character.')
+                    return render(request,'WW/error.html')
+                else:
+                    user = signup_form.save(commit=False)
+                    user.password = make_password(password)
+                    user.save()
+                    messages.success(request, "Account created successfully. Please log in.")
+                    return redirect('home')
+            else:
+                for field in signup_form.errors:
+                    messages.error(request, f"{field}: {signup_form.errors[field]}")
 
     return render(request, 'WW/signup.html', {
         'login_form': login_form,
@@ -71,6 +83,7 @@ def forgot_password(request):
         form = ForgotPasswordForm()
 
     return render(request, 'WW/forgot-password.html', {'forgot_password_form': form})
+
 
 def i1(request):  
     user_id = request.session.get('user_id')  
