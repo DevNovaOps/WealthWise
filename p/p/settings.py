@@ -91,13 +91,15 @@ DATABASES = {
         'PASSWORD': 'dev@2006',  
         'HOST': 'localhost',  
         'PORT': '3306', 
+        'OPTIONS':{
+            'charset': 'utf8mb4',
+            'init_command': "SET NAMES utf8mb4  COLLATE utf8mb4_unicode_ci",
+        },
     }  
 }  
 
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -23,6 +23,7 @@ def signup(request):
                 password = login_form.cleaned_data['password']
                 try:
                     user = User.objects.get(email=email)
+                  
                     if check_password(password, user.password):
                         request.session['user_id'] = user.id 
                         return redirect('signup') 
@@ -76,25 +77,34 @@ def i1(request):
     if not user_id:  
         messages.error(request, "You must be logged in.")  
         return redirect('signup') 
+    
     user = User.objects.get(id=user_id)  
-    incomes = Income.objects.filter(user=user)
-    expenses = Expense.objects.filter(user=user)
-    income_form = IncomeForm()
-    expense_form = ExpenseForm()
+    selected_month = request.GET.get('month', 'January') 
+
+    incomes = Income.objects.filter(user=user, month=selected_month)
+    expenses = Expense.objects.filter(user=user, month=selected_month)
+
     total_income = sum(income.amount for income in incomes)
     total_expense = sum(expense.amount for expense in expenses)
     savings = total_income - total_expense
-    
+
+    total_expense_percentage = (total_expense / total_income * 100) if total_income else 0
+    savings_percentage = (savings / total_income * 100) if total_income else 0
+
     return render(request, 'WW/i1.html', {
+        'user': user,
+        'selected_month': selected_month,
         'incomes': incomes,
         'expenses': expenses,
         'total_income': total_income,
         'total_expense': total_expense,
         'savings': savings,
-        'income_form': income_form,
-        'expense_form': expense_form,
+        'total_expense_percentage': total_expense_percentage,
+        'savings_percentage': savings_percentage,
+        'income_form': IncomeForm(),
+        'expense_form': ExpenseForm(),
     })
-   
+
 
 def add_income(request):
     user_id = request.session.get('user_id')
@@ -108,11 +118,13 @@ def add_income(request):
         if form.is_valid():
             income = form.save(commit=False)
             income.user = user
+            income.month = request.POST.get('month', 'January')  
             income.save()
             messages.success(request, 'Income added successfully!')
         else:
             messages.error(request, 'Please correct the errors.')
     return redirect('i1')
+
 
 def add_expense(request):
     user_id = request.session.get('user_id')
@@ -127,6 +139,7 @@ def add_expense(request):
         if form.is_valid():
             expense = form.save(commit=False)
             expense.user = user
+            expense.month = request.POST.get('month', 'January') 
             expense.save()
             messages.success(request, 'Expense added successfully!')
         else:

@@ -58,20 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         hamburger.classList.toggle('active');
     });
 
-    // Check if the user is logged in (Example: Using localStorage)
-    const isLoggedIn = localStorage.getItem('isLoggedIn'); // Assume this is set on login
-    const loginBtn = document.querySelector('.login-btn');
-    const logoutBtn = document.querySelector('.logout-btn');
-
-    if (isLoggedIn) {
-        loginBtn.style.display = 'none'; // Hide login button
-        logoutBtn.style.display = 'block'; // Show logout button
-    } else {
-        loginBtn.style.display = 'block'; // Show login button
-        logoutBtn.style.display = 'none'; // Hide logout button
-    }
-
-    // Logout event listener
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('isLoggedIn'); // Remove login status
         window.location.reload(); // Reload the page to update UI
