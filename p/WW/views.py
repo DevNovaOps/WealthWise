@@ -4,8 +4,8 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from .forms import SignupForm, LoginForm, ForgotPasswordForm, IncomeForm, ExpenseForm
 from .models import User, Income, Expense
+from django.urls import reverse
 import re
-import time
 
 def home(request):
     return render(request, 'WW/home.html')
@@ -16,7 +16,6 @@ def signup(request):
         return redirect('home')
     login_form = LoginForm()
     signup_form = SignupForm()
-
     if request.method == 'POST':
         if 'login' in request.POST:
             login_form = LoginForm(request.POST)
@@ -136,8 +135,10 @@ def add_income(request):
             messages.success(request, 'Income added successfully!')
         else:
             messages.error(request, 'Please correct the errors.')
-    return redirect('i1')
-
+    
+  
+    selected_month = request.POST.get('month', 'January')
+    return redirect(reverse('i1') + f'?month={selected_month}')
 
 def add_expense(request):
     user_id = request.session.get('user_id')
@@ -146,7 +147,6 @@ def add_expense(request):
         return redirect('signup')
 
     user = User.objects.get(id=user_id)
-
     if request.method == 'POST':
         form = ExpenseForm(request.POST)
         if form.is_valid():
@@ -157,7 +157,9 @@ def add_expense(request):
             messages.success(request, 'Expense added successfully!')
         else:
             messages.error(request, 'Please correct the errors.')
-    return redirect('i1')
+    
+    selected_month = request.POST.get('month', 'January')
+    return redirect(reverse('i1') + f'?month={selected_month}')
 
 def logout(request):
     if request.session.get('user_id'):
@@ -167,3 +169,4 @@ def logout(request):
 
 def G(request):
     return render(request, 'WW/G.html')
+

@@ -65,8 +65,8 @@ class ExpenseForm(forms.ModelForm):
 
     def save(self, commit=True, user=None):
         instance = super().save(commit=False)
-        instance.emoji = self.cleaned_data['category'].split()[0]  # Extract emoji
-        instance.category = self.cleaned_data['category']  # Store full text (emoji + name)
+        instance.emoji = self.cleaned_data['category'].split()[0]
+        instance.category = self.cleaned_data['category']  
         if user:
             instance.user = user
         if commit:

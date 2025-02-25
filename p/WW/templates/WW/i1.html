@@ -30,7 +30,7 @@
             <div class="card-title">Total Income</div>
             <div class="amount">{{user.currency.symbol}}{{ total_income }}</div>
             <div class="progress-container">
-                <div class="progress-bar safe" style="width: 100%"></div>
+                <div class="progress-bar safe" style="width: 0%"></div>
             </div>
         </div>
 
@@ -77,7 +77,7 @@
             <div class="category-item">
                 <span class="category-icon">{{ income.emoji }}</span>
                 <div class="category-name">{{ income.source }}</div>
-                <div class="amount">₹{{ income.amount }}</div>
+                <div class="amount">{{user.currency.symbol}}{{ income.amount }}</div>
             </div>
             {% endfor %}
         </div>
