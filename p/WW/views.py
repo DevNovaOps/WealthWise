@@ -170,3 +170,62 @@ def logout(request):
 def G(request):
     return render(request, 'WW/G.html')
 
+import plotly.graph_objs as go
+import plotly.io as pio
+
+def report(request):
+        user_id = request.session.get('user_id')
+        if not user_id:
+            messages.error(request, "You must be logged in.")
+            return redirect('signup')
+
+        user = User.objects.get(id=user_id)
+        currency = getattr(user, 'currency', 'USD')
+
+        incomes = Income.objects.filter(user=user)
+        expenses = Expense.objects.filter(user=user)
+
+        total_income = sum(income.amount for income in incomes)
+        total_expense = sum(expense.amount for expense in expenses)
+        savings = total_income - total_expense
+
+        months = ["January", "February", "March", "April", "May", "June", "July",
+                  "August", "September", "October", "November", "December"]
+        income_values = [sum(i.amount for i in incomes if i.month == month) for month in months]
+        expense_values = [sum(e.amount for e in expenses if e.month == month) for month in months]
+
+        # 📊 Generate Graphs
+        bar_graph = pio.to_json({
+            "data": [
+                go.Bar(x=months, y=income_values, name="Income", marker=dict(color="green")),
+                go.Bar(x=months, y=expense_values, name="Expenses", marker=dict(color="red"))
+            ],
+            "layout": go.Layout(title="Monthly Income vs Expenses", barmode="group")
+        })
+
+        line_graph = pio.to_json({
+            "data": [
+                go.Scatter(x=months, y=income_values, mode="lines+markers", name="Income", line=dict(color="green")),
+                go.Scatter(x=months, y=expense_values, mode="lines+markers", name="Expenses", line=dict(color="red"))
+            ],
+            "layout": go.Layout(title="Income & Expense Trends")
+        })
+
+        categories = list(set(expense.category for expense in expenses))
+        category_values = [sum(e.amount for e in expenses if e.category == category) for category in categories]
+
+        pie_chart = pio.to_json({
+            "data": [go.Pie(labels=categories, values=category_values, hole=0.4)],
+            "layout": go.Layout(title="Yearly Expense Breakdown by Category")
+        })
+
+        return render(request, 'WW/report.html', {
+            'user': user,
+            'currency': currency,
+            'total_income': total_income,
+            'total_expense': total_expense,
+            'savings': savings,
+            'bar_graph': bar_graph,
+            'line_graph': line_graph,
+            'pie_chart': pie_chart
+        })

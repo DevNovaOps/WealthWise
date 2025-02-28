@@ -1,0 +1,121 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Report</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'report.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2 class="title">Financial Report</h2>
+        <div class="user-profile">
+            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+            <p>Email: {{ user.email }}</p>
+            <p>Currency: {{ currency }}({{user.currency.symbol}})</p>
+        </div>
+
+        <!-- Yearly Summary -->
+        <div class="summary">
+            <div class="box income-box">
+                <h3>Total Yearly Income</h3>
+                <p>{{ total_income }} {{user.currency.symbol}}</p>
+            </div>
+            <div class="box expense-box">
+                <h3>Total Yearly Expense</h3>
+                <p>{{ total_expense }} {{user.currency.symbol}}</p>
+            </div>
+            <div class="box savings-box">
+                <h3>Yearly Savings</h3>
+                <p>{{ savings }} {{user.currency.symbol}}</p>
+            </div>
+        </div>
+
+        <!-- Graphs Section --><div class="graphs">
+    <h3 style="color: #ffffff;">Month-to-Month Income & Expense</h3>
+    <div class="graph-container" id="bar_graph"></div>
+
+    <h3 style="color: #ffffff;">Income & Expense Trends</h3>
+    <div class="graph-container" id="line_graph"></div>
+
+    <h3 style="color: #ffffff;">Expense Breakdown by Category</h3>
+    <div class="graph-container" id="pie_chart"></div>
+    </div>
+</div>
+
+<script>
+
+    const darkTheme = {
+        paper_bgcolor: '#121212',  // Deep dark background
+        plot_bgcolor: '#1E1E1E', 
+        font: { family: '-apple system, sans-serif', size: 14, color: '#E0E0E0' }, // Light text
+        margin: { t: 50, l: 60, r: 40, b: 60 }
+    };
+
+    // 🎨 Define Colors
+    const incomeColor = '#7FFF8C';
+    const expenseColor = '#FF7F7F';
+
+    // 📊 Bar Graph with Custom Colors
+    var barGraph = {{ bar_graph|safe }};
+    barGraph.layout = {
+        ...darkTheme,
+        barmode: 'group',
+        xaxis: { title: 'Months', showgrid: false, tickangle: -30, color: '#E0E0E0' },
+        yaxis: { title: 'Amount {{user.currency.symbol}}', gridcolor: '#444', color: '#E0E0E0' },
+        hovermode: 'x unified',
+        showlegend: true
+    };
+
+    // Apply colors based on data type
+    barGraph.data.forEach(trace => {
+        if (trace.name.toLowerCase().includes('income')) {
+            trace.marker = { color: incomeColor, opacity: 0.85, line: { width: 1.5, color: '#ffffff' } };
+        } else if (trace.name.toLowerCase().includes('expense')) {
+            trace.marker = { color: expenseColor, opacity: 0.85, line: { width: 1.5, color: '#ffffff' } };
+        }
+    });
+
+    Plotly.newPlot('bar_graph', barGraph.data, barGraph.layout);
+    var lineGraph = {{ line_graph|safe }};
+    lineGraph.layout = {
+        ...darkTheme,
+        xaxis: { title: 'Months', showgrid: false, color: '#E0E0E0' },
+        yaxis: { title: 'Amount ({{user.currency.symbol}})', gridcolor: '#444', color: '#E0E0E0' },
+        hovermode: 'x unified',
+        showlegend: true
+    };
+
+    lineGraph.data.forEach(trace => {
+        if (trace.name.toLowerCase().includes('income')) {
+            trace.line = { shape: 'spline', smoothing: 1.2, width: 3, color: incomeColor };
+            trace.marker = { size: 7, symbol: 'circle', color: incomeColor, line: { width: 1.5, color: '#ffffff' } };
+        } else if (trace.name.toLowerCase().includes('expense')) {
+            trace.line = { shape: 'spline', smoothing: 1.2, width: 3, color: expenseColor };
+            trace.marker = { size: 7, symbol: 'circle', color: expenseColor, line: { width: 1.5, color: '#ffffff' } };
+        }
+    });
+
+    Plotly.newPlot('line_graph', lineGraph.data, lineGraph.layout);
+
+    // 🥧 Pie Chart (Donut Style) - Keeping vibrant colors
+    var pieChart = {{ pie_chart|safe }};
+    pieChart.layout = {
+        ...darkTheme,
+        showlegend: true
+    };
+
+    pieChart.data.forEach(trace => {
+        trace.hole = 0.4; // Donut effect
+        trace.marker = {
+            colors: ['#ff6f61', '#6b5b95', '#feb236', '#d64161', '#ff7b25'],
+            line: { color: '#ffffff', width: 2 }
+        };
+    });
+
+    Plotly.newPlot('pie_chart', pieChart.data, pieChart.layout);
+</script> 
+</body>
+</html>
