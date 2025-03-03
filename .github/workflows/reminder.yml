@@ -42,7 +42,7 @@ jobs:
 
       - name: Set Up Django Environment
         env:
-          DJANGO_SETTINGS_MODULE: WealthWise.settings
+          DJANGO_SETTINGS_MODULE: p.settings
           DATABASE_NAME: ${{ secrets.DB_NAME }}
           DATABASE_USER: ${{ secrets.DB_USER }}
           DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
