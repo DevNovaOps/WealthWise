@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Payment Reminder</title>
+    <style>
+        :root {
+            --primary-green: #00ff00;
+            --secondary-green: #00cc00;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --border-color: #2a2a2a;
+            --hover-bg: #2c2c2c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .container1 {
+            display: block;
+            margin-left:320px;
+            padding: 10px 20px; 
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: inline-block;
+            
+    
+        }
+        .container2:hover {
+            background-color: var(--dark-bg);
+        }
+
+        .container2 {
+            display: block;
+            padding: 10px 20px; 
+            background-color: var(--primary-green);
+            color: var(--dark-bg);
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            display: inline-block;
+            
+    
+        }
+        .container2:hover {
+            background-color: var(--dark-bg);
+            color: var(--primary-green)
+        }
+
+        .container3 {
+            display: block;
+            padding: 10px 20px;
+            background-color: var(--primary-green);
+            color: var(--dark-bg);
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            display: inline-block;
+            
+    
+        }
+        .container3:hover {
+            background-color: var(--dark-bg);
+            color: var(--primary-green)
+        }
+
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            {% comment %} margin-bottom: 20px; {% endcomment %}
+           display: inline-block;
+        }
+
+        /* Stats Section */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--hover-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card {
+            padding: 15px;
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-title {
+            font-size: 0.9em;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: var(--hover-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-title {
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-green);
+            transition: width 0.3s ease;
+        }
+
+        .add-bill-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid var(--primary-green);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        button {
+            background-color: var(--primary-green);
+            color: var(--dark-bg);
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: var(--dark-bg);
+            color: var(--primary-green);
+        }
+
+        .bills-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .bill-item {
+            background-color: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bill-info {
+            flex-grow: 1;
+        }
+
+        .bill-name {
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .bill-details {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .bill-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .paid {
+            background-color: rgba(0, 255, 0, 0.1);
+            border-color: var(--primary-green);
+        }
+
+        .delete-btn {
+            background-color: #ff3333;
+        }
+
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .status-btn {
+            background-color: var(--primary-green);
+        }
+
+        .status-btn.unpaid {
+            background-color: #666;
+            color: var(--text-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-color);
+            opacity: 0.7;
+            padding: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .add-bill-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span>
+        <h1>Bill Payment Reminder</h1>
+        <a href="{% url 'home' %}" class="container1"> Home </a>
+        </span>
+
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-title">Total Bills</div>
+                <div id="totalBills" class="stat-value">{{ total_bills }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Pending Amount</div>
+                <div id="totalAmount" class="stat-value">{{user.currency.symbol}}{{ pending_amount }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Paid Amount</div>
+                <div id="paidAmount" class="stat-value">{{user.currency.symbol}}{{ paid_amount }}</div>
+            </div>
+            {% comment %} <div class="stat-card">
+                <div class="stat-title">Pending Amount</div>
+                <div id="pendingAmount" class="stat-value">${{ pending_amount }}</div>
+            </div> {% endcomment %}
+        </div>
+
+        <form id="billForm" method="POST" action="{% url 'add_bill' %}" class="add-bill-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Bill Name</label>
+                 {{ bill_form.bill_name }}
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                 {{ bill_form.amount }}
+            </div>
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" id="dueDate" name="due_date" required>
+            </div>
+            <div></div>
+            <div class="form-group">
+                <button type="submit">Create Bill</button>
+            </div>
+        </form>
+
+        <div id="billsList" class="bills-list">
+            {% for bill in bills %}
+            {% if bill.is_paid %}
+                <div class="bill-item" id="bill-{{ bill.id }}">
+                <div class="bill-info">
+                    <div class="bill-name">{{ bill.bill_name }}</div>
+                    <div class="bill-details">Amount: {{user.currency.symbol}}{{ bill.amount }} | Due Date: {{ bill.due_date }}</div>
+                </div>
+                <div class="bill-actions">
+                    <a href="{% url 'delete_bill' bill.id %}" class="container3"> Delete </a>
+                </div>
+            </div>       
+                
+                {% else %}
+            <div class="bill-item" id="bill-{{ bill.id }}">
+                <div class="bill-info">
+                    <div class="bill-name">{{ bill.bill_name }}</div>
+                    <div class="bill-details">Amount: {{user.currency.symbol}}{{ bill.amount }} | Due Date: {{ bill.due_date }}</div>
+                </div>
+                <div class="bill-actions">
+                    <a href="{% url 'mark_bill' bill.id %}" class="container2"> Mark as Paid </a>
+                    <a href="{% url 'delete_bill' bill.id %}" class="container3"> Delete </a>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    
+
+    {% comment %} <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateStats() {
+                fetch('b1') // Replaco''ur actual API endpoint
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('totalBills').textContent = data.total_bills;
+                        document.getElementById('totalAmount').textContent = $${data.total_amount};
+                        document.getElementById('paidAmount').textContent = $${data.paid_amount};
+                        document.getElementById('pendingAmount').textContent = $${data.pending_amount};
+                        document.getElementById('progressFill').style.width = ${data.progress_percentage}%;
+                    });
+            }
+
+            // Call updateStats periodically or after certain actions
+            setInterval(updateStats, 60000); // Update every minute
+
+            // Handle form submission
+            document.getElementById('billForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch('{% url "add_bill" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the stats
+                        updateStats();
+
+                        // Optionally, clear the form fields
+                        document.getElementById('billForm').reset();
+                    } else {
+                        alert('Failed to add the bill.');
+                    }
+                });
+            });
+
+            window.togglePaidStatus = function(billId, isPaid) {
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                fetch(/mark_bill/${billId}/, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_paid: !isPaid })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the stats
+                        document.getElementById('totalBills').textContent = data.total_bills;
+                        document.getElementById('totalAmount').textContent = $${data.total_amount};
+                        document.getElementById('paidAmount').textContent = $${data.paid_amount};
+                        document.getElementById('pendingAmount').textContent = $${data.pending_amount};
+                        document.getElementById('progressFill').style.width = ${data.progress_percentage}%;
+                    } else {
+                        alert('Failed to update the bill status.');
+                    }
+                });
+            }
+
+            window.deleteBill = function(billId) {
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                fetch(/delete_bill/${billId}/, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Remove the bill item from the DOM
+                        document.getElementById(bill-${billId}).remove();
+                        // Update the stats
+                        updateStats();
+                    } else {
+                        alert('Failed to delete the bill.');
+                    }
+                });
+            }
+        });
+    </script> {% endcomment %}
+</body>
+</html>

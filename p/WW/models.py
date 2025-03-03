@@ -51,3 +51,21 @@ class Expense(models.Model):
     def __str__(self):
         return f"{self.category} - {self.currency.symbol}{self.amount}"
     
+class Bill(models.Model):
+    currency= models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True,blank=True)
+    bill_name = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    due_date = models.DateField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_paid = models.BooleanField(default=False)
+    def _str_(self):
+        return self.name
+    
+class Goal(models.Model):
+    currency= models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True,blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    goal_name = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    due_date = models.DateField()
+    is_done = models.BooleanField(default=False)
+    

@@ -1,5 +1,5 @@
 from django import forms
-from .models import User, Income, Expense,Currency
+from .models import User, Income, Expense,Currency,Bill,Goal
 
 class SignupForm(forms.ModelForm):
     currency=forms.ModelChoiceField(queryset=Currency.objects.all(),empty_label='Select Currency',required= True)
@@ -72,3 +72,13 @@ class ExpenseForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+    
+class billForm(forms.ModelForm):
+    class Meta:
+        model = Bill
+        fields = ['bill_name', 'amount', 'due_date', 'is_paid']
+        
+class goalForm(forms.ModelForm):
+    class Meta:
+        model = Goal
+        fields = ['goal_name', 'amount', 'due_date', 'is_done']
