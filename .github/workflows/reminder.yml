@@ -18,17 +18,23 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Install Dependencies
-        run: |
-          pip install django mysqlclient django-tailwind  # Added django-tailwind
-          # If you have a requirements.txt file, use this instead:
-          # pip install -r requirements.txt
-
       - name: Check directory structure
         run: |
           pwd
           ls -la
           find . -name "manage.py"
+          find . -name "requirements.txt"
+
+      - name: Install Dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install django mysqlclient django-tailwind plotly
+          fi
+          
+      - name: Debug installed packages
+        run: pip list
 
       - name: Setup MySQL Database
         env:
