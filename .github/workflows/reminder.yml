@@ -28,14 +28,14 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           sudo systemctl start mysql
-          mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
-          mysql -u root -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
-          mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
-          mysql -u root -e "FLUSH PRIVILEGES;"
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+          sudo mysql -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+          sudo mysql -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
 
       - name: Set Up Django Environment
         env:
-          DJANGO_SETTINGS_MODULE: WealthWise.settings
+          DJANGO_SETTINGS_MODULE: p.settings
           DATABASE_NAME: ${{ secrets.DB_NAME }}
           DATABASE_USER: ${{ secrets.DB_USER }}
           DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
