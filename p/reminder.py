@@ -7,13 +7,11 @@ from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from WW.models import Bill
 
-# Setup Django environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "YourProject.settings")  
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "p.settings")  
 django.setup()
 
 def bill_reminder_service():
     User = get_user_model()
-
     while True:
         today = now().date()
         users = User.objects.all()
@@ -24,7 +22,7 @@ def bill_reminder_service():
             for bill in bills:
                 days_left = (bill.due_date - today).days
 
-                if days_left in [5, 2, 1]:  # Send reminder if due soon
+                if days_left in [5, 2, 1]: 
                     message = f"""
                     Dear {user.username},
 
@@ -39,13 +37,12 @@ def bill_reminder_service():
                     send_mail(
                         'Bill Payment Reminder',
                         message,
-                        'puranikarnik@gmail.com',  # Replace with your email
+                        'wealthwise200@gmail.com',
                         [user.email],
                         fail_silently=False,
                     )
-
         print("Checked for bill reminders. Sleeping for 24 hours...")
         time.sleep(86400)  
-
+        
 if __name__ == "__main__":
     bill_reminder_service()

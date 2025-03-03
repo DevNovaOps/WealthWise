@@ -1,0 +1,33 @@
+name: Daily Bill Reminder
+
+on:
+  schedule:
+    - cron: "0 9 * * *" 
+  workflow_dispatch: 
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+
+      - name: Install Dependencies
+        run: pip install django
+
+      - name: Set Up Django Environment
+        run: |
+          export DJANGO_SETTINGS_MODULE=WealthWise.settings  # Update project name
+          python manage.py migrate  # Ensure DB is ready
+
+      - name: Run Reminder Script
+        env:
+          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+        run: python reminder.py
