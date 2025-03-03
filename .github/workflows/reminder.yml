@@ -19,7 +19,10 @@ jobs:
           python-version: "3.9"
 
       - name: Install Dependencies
-        run: pip install django mysqlclient  # Add 'psycopg2' if using PostgreSQL
+        run: |
+          pip install django mysqlclient django-tailwind  # Added django-tailwind
+          # If you have a requirements.txt file, use this instead:
+          # pip install -r requirements.txt
 
       - name: Check directory structure
         run: |
