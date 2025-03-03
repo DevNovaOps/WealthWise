@@ -21,6 +21,12 @@ jobs:
       - name: Install Dependencies
         run: pip install django mysqlclient  # Add 'psycopg2' if using PostgreSQL
 
+      - name: Check directory structure
+        run: |
+          pwd
+          ls -la
+          find . -name "manage.py"
+
       - name: Setup MySQL Database
         env:
           DB_NAME: ${{ secrets.DB_NAME }}
@@ -43,6 +49,7 @@ jobs:
           DATABASE_HOST: ${{ secrets.DB_HOST }}
           DATABASE_PORT: ${{ secrets.DB_PORT }}
         run: |
+          cd p  # Navigate to the project directory
           python manage.py migrate
           python manage.py collectstatic --noinput
 
@@ -50,4 +57,6 @@ jobs:
         env:
           EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-        run: python reminder.py
+        run: |
+          cd p  # Navigate to the project directory
+          python reminder.py
