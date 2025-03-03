@@ -18,47 +18,28 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Check directory structure
-        run: |
-          pwd
-          ls -la
-          find . -name "manage.py"
-          find . -name "requirements.txt"
+      - name: Install MySQL Client
+        run: sudo apt-get install -y mysql-client
 
-      - name: Install Dependencies
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            pip install django mysqlclient django-tailwind plotly
-          fi
-          
-      - name: Debug installed packages
-        run: pip list
+      - name: Start MySQL Service
+        run: sudo systemctl start mysql
 
-      - name: Setup MySQL Database
-        env:
-          DB_NAME: wealthwise
-          DB_USER: root
-          DB_PASSWORD: dev@2006
-          MYSQL_ROOT_PASSWORD: "root"  # Default root password for MySQL in GitHub Actions
+      - name: Debug MySQL Connection
         run: |
-          sudo systemctl start mysql
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS wealthwise;"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'dev@2006';"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON wealthwise.* TO 'root'@'localhost';"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+          mysql -uroot -pdev@2006 -e "SHOW DATABASES;"
+
+      - name: Set Up Database
+        run: |
+          mysql -uroot -pdev@2006 -e "CREATE DATABASE IF NOT EXISTS wealthwise;"
+          mysql -uroot -pdev@2006 -e "CREATE USER IF NOT EXISTS 'django_user'@'localhost' IDENTIFIED BY 'django_password';"
+          mysql -uroot -pdev@2006 -e "GRANT ALL PRIVILEGES ON wealthwise.* TO 'django_user'@'localhost';"
+          mysql -uroot -pdev@2006 -e "FLUSH PRIVILEGES;"
 
       - name: Set Up Django Environment
         env:
           DJANGO_SETTINGS_MODULE: p.settings
-          DATABASE_NAME: wealthwise
-          DATABASE_USER: root
-          DATABASE_PASSWORD: dev@2006
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 3306
         run: |
-          cd p  # Navigate to the project directory
+          cd p
           python manage.py migrate
           python manage.py collectstatic --noinput
 
@@ -67,5 +48,5 @@ jobs:
           EMAIL_HOST_USER: wealthwise200@gmail.com
           EMAIL_HOST_PASSWORD: hcayuxvpkvetdcxx'
         run: |
-          cd p  
+          cd p
           python reminder.py
