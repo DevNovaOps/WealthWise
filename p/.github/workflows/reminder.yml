@@ -2,9 +2,8 @@ name: Daily Bill Reminder
 
 on:
   schedule:
-    - cron: "0 9 * * *" 
+    - cron: "0 9 * * *"  
   workflow_dispatch: 
-
 jobs:
   send-reminders:
     runs-on: ubuntu-latest
@@ -19,12 +18,31 @@ jobs:
           python-version: "3.9"
 
       - name: Install Dependencies
-        run: pip install django
+        run: pip install django mysqlclient  
+
+      - name: Setup Database (MySQL)
+        env:
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          sudo systemctl start mysql
+          mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+          mysql -u root -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+          mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
+          mysql -u root -e "FLUSH PRIVILEGES;"
 
       - name: Set Up Django Environment
+        env:
+          DJANGO_SETTINGS_MODULE: WealthWise.settings
+          DATABASE_NAME: ${{ secrets.DB_NAME }}
+          DATABASE_USER: ${{ secrets.DB_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DATABASE_HOST: ${{ secrets.DB_HOST }}
+          DATABASE_PORT: ${{ secrets.DB_PORT }}
         run: |
-          export DJANGO_SETTINGS_MODULE=WealthWise.settings  # Update project name
-          python manage.py migrate  # Ensure DB is ready
+          python manage.py migrate
+          python manage.py collectstatic --noinput
 
       - name: Run Reminder Script
         env:
