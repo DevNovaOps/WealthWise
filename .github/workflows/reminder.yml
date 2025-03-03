@@ -2,8 +2,8 @@ name: Daily Bill Reminder
 
 on:
   schedule:
-    - cron: "0 9 * * *"  # Runs daily at 9 AM UTC
-  workflow_dispatch:  # Allows manual execution
+    - cron: "0 9 * * *"
+  workflow_dispatch:
 
 jobs:
   send-reminders:
@@ -19,35 +19,29 @@ jobs:
           python-version: "3.9"
 
       - name: Install Dependencies
-        run: pip install django mysqlclient  # Add 'psycopg2' if using PostgreSQL
+        run: pip install django mysqlclient 
 
-      - name: Setup MySQL Database
-        env:
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          MYSQL_ROOT_PASSWORD: "root"  # Default root password for MySQL in GitHub Actions
+      - name: Setup Database (MySQL)
         run: |
           sudo systemctl start mysql
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+          mysql -u root -e "CREATE DATABASE IF NOT EXISTS wealthwise;"
+          mysql -u root -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'dev@2006';"
+          mysql -u root -e "GRANT ALL PRIVILEGES ON wealthwise.* TO 'root'@'localhost';"
+          mysql -u root -e "FLUSH PRIVILEGES;"
 
       - name: Set Up Django Environment
-        env:
-          DJANGO_SETTINGS_MODULE: WealthWise.settings
-          DATABASE_NAME: ${{ secrets.DB_NAME }}
-          DATABASE_USER: ${{ secrets.DB_USER }}
-          DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DATABASE_HOST: ${{ secrets.DB_HOST }}
-          DATABASE_PORT: ${{ secrets.DB_PORT }}
         run: |
+          export DJANGO_SETTINGS_MODULE=p.settings
+          export DATABASE_NAME=wealthwise
+          export DATABASE_USER=root
+          export DATABASE_PASSWORD=dev@2006
+          export DATABASE_HOST=localhost
+          export DATABASE_PORT=3306
           python manage.py migrate
           python manage.py collectstatic --noinput
 
       - name: Run Reminder Script
         env:
-          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
-          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          EMAIL_HOST_USER: wealthwise200@gmail.com
+          EMAIL_HOST_PASSWORD: hcayuxvpkvetdcxx
         run: python reminder.py
