@@ -38,25 +38,25 @@ jobs:
 
       - name: Setup MySQL Database
         env:
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: wealthwise
+          DB_USER: root
+          DB_PASSWORD: dev@2006
           MYSQL_ROOT_PASSWORD: "root"  # Default root password for MySQL in GitHub Actions
         run: |
           sudo systemctl start mysql
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
+          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS wealthwise;"
+          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'dev@2006';"
+          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON wealthwise.* TO 'root'@'localhost';"
           sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
 
       - name: Set Up Django Environment
         env:
           DJANGO_SETTINGS_MODULE: p.settings
-          DATABASE_NAME: ${{ secrets.DB_NAME }}
-          DATABASE_USER: ${{ secrets.DB_USER }}
-          DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DATABASE_HOST: ${{ secrets.DB_HOST }}
-          DATABASE_PORT: ${{ secrets.DB_PORT }}
+          DATABASE_NAME: wealthwise
+          DATABASE_USER: root
+          DATABASE_PASSWORD: dev@2006
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 3306
         run: |
           cd p  # Navigate to the project directory
           python manage.py migrate
@@ -64,8 +64,8 @@ jobs:
 
       - name: Run Reminder Script
         env:
-          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
-          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          EMAIL_HOST_USER: wealthwise200@gmail.com
+          EMAIL_HOST_PASSWORD: hcayuxvpkvetdcxx'
         run: |
-          cd p  # Navigate to the project directory
+          cd p  
           python reminder.py
