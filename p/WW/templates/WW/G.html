@@ -1,312 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Financial Goal Tracker</title>
-  <style>
-    :root {
-      --primary-green: #00ff00;
-      --secondary-green: #00cc00;
-      --dark-bg: #121212;
-      --card-bg: #1e1e1e;
-      --text-color: #ffffff;
-      --border-color: #2a2a2a;
-      --hover-bg: #2c2c2c;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-
-    body {
-      background-color: var(--dark-bg);
-      padding: 20px;
-      color: var(--text-color);
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: var(--card-bg);
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-      padding: 20px;
-      border: 1px solid var(--border-color);
-    }
-    .container1 {
-      display: block;
-      margin-left:320px;
-      padding: 10px 20px; 
-      background-color: var(--card-bg);
-      color: var(--text-color);
-      text-align: center;
-      text-decoration: none;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      display: inline-block;
-    }
-    .container1:hover {
-      background-color: var(--dark-bg);
-    }
-
-    .container2 {
-      display: block;
-      padding: 10px 40px; 
-      margin-left:250px;
-      background-color: var(--primary-green);
-      color: var(--dark-bg);
-      text-decoration: none;
-      border-radius: 10px;
-      transition: background-color 0.3s;
-      float: right;
-    }
-    .container2:hover {
-      background-color: var(--dark-bg);
-      color: var(--primary-green);
-    }
-    .container3 {
-      margin-left:130px;
-      padding: 10px 40px; 
-      background-color: var(--primary-green);
-      color: var(--dark-bg);
-      align-items: center;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: background-color 0.3s;
-      display: inline-block;
-      float: right;
-    }
-    .container3:hover {
-      background-color: var(--dark-bg);
-      color: var(--primary-green);
-    }
-
-    .container4 {
-      display: block;
-      padding: 10px 20px;
-      background-color: var(--primary-green);
-      color: var(--dark-bg);
-      align-items: center;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: background-color 0.3s;
-      display: inline-block;
-      float: right;
-    }
-    .container4:hover {
-      background-color: var(--dark-bg);
-      color: var (--primary-green);
-    }
-
-    .container5 {
-      margin-right: 20px;
-      display: block;
-      padding: 10px 20px;
-      background-color: var(--primary-green);
-      color: var(--dark-bg);
-      align-items: center;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: background-color 0.3s;
-      display: inline-block;
-      float: right;
-    }
-    .container5:hover {
-      background-color: var(--dark-bg);
-      color: var(--primary-green);
-    }
-
-    h1 {
-      text-align: center;
-      color: var(--text-color);
-      display: inline-block;
-    }
-
-    .stats-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-      margin-bottom: 30px;
-      padding: 20px;
-      background-color: var(--hover-bg);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
-    .stat-card {
-      padding: 15px;
-      border-radius: 6px;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      text-align: center;
-    }
-
-    .stat-title {
-      font-size: 0.9em;
-      color: var(--text-color);
-      opacity: 0.8;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 1.5em;
-      font-weight: bold;
-      color: var(--primary-green);
-    }
-
-    .add-goal-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      margin-bottom: 5px;
-      color: var(--text-color);
-    }
-
-    input, select {
-      padding: 8px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      font-size: 14px;
-      border-color: var(--primary-green);
-      background-color: var(--card-bg);
-      color: var(--text-color);
-      transition: background-color 0.2s, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    }
-
-    input:hover,
-    select:hover {
-      background-color: var(--hover-bg);
-      transform: scale(1.05);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    }
-
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary-green);
-    }
-
-    button {
-      background-color: var(--primary-green);
-      color: var(--dark-bg);
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background-color: var(--dark-bg);
-      color: var(--primary-green);
-      transform: scale(1.05);
-      transition: transform 0.4s ease-in-out;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    }
-
-    .goals-list {
-      display: grid;
-      gap: 15px;
-    }
-
-    .goal-info {
-      flex-grow: 1;
-    }
-
-    .goal-name {
-      font-weight: bold;
-      color: var (--text-color);
-      margin-bottom: 5px;
-    }
-
-    .goal-item {
-      background-color: var(--hover-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .goal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .goal-details {
-      color: var(--text-color);
-      opacity: 0.8;
-      font-size: 14px;
-    }
-
-    .goal-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .completed {
-      border-color: var(--primary-green);
-      background-color: rgba(0, 255, 0, 0.1);
-    }
-
-    .delete-btn {
-      background-color: #ff3333;
-    }
-
-    .delete-btn:hover {
-      background-color: #cc0000;
-    }
-
-    .contribution-input {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .empty-state {
-      text-align: center;
-      color: var(--text-color);
-      opacity: 0.7;
-      padding: 20px;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 15px;
-      }
-
-      .add-goal-form {
-        grid-template-columns: 1fr;
-      }
-
-      .goal-header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-      }
-
-      .goal-actions {
-        width: 100%;
-        justify-content: flex-end;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="{% static 'G.css' %}">
 </head>
 <body>
   <div class="container">
@@ -328,7 +27,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-title">Total Saved</div>
-        <div id="totalSaved" class="stat-value">{{user.currency.symbol}}{{completed_amount}}</div>
+        <div id="totalSaved" class="stat-value">{{user.currency.symbol}}{{savings}}</div>
       </div>
     </div>
     
@@ -369,7 +68,6 @@
         <a href="{% url 'd_g' goal.id %}" class="container5"> Delete </a>
       </div>
     </div>       
-      
       {% else %}
     <div class="goal-item" id="goal-{{ goal.id }}">
       <div class="goal-info">
@@ -385,7 +83,8 @@
     {% endfor %}
 
   <script>
-    function toggleLockGoals() {
+
+      function toggleLockGoals() {
       const addGoalButton = document.getElementById('addGoalButton');
       const lockGoalsButton = document.getElementById('lockGoalsButton');
 

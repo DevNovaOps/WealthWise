@@ -6,6 +6,9 @@ from .forms import SignupForm, LoginForm, ForgotPasswordForm, IncomeForm, Expens
 from .models import User, Income, Expense,Bill,Goal
 from django.urls import reverse
 import re
+import plotly.graph_objs as go
+import plotly.io as pio
+
 
 def home(request):
     return render(request, 'WW/home.html')
@@ -184,6 +187,10 @@ def g1(request):
     total_goals = goals.count()
     total_amount = sum(goal.amount for goal in goals)
     completed_amount = sum(goal.amount for goal in goals if goal.is_done)
+    total_income = sum(income.amount for income in Income.objects.filter(user=user))
+    total_expense = sum(expense.amount for expense in Expense.objects.filter(user=user))
+    savings = total_income - total_expense  
+
     pending_amount = total_amount - completed_amount
     if request.method == 'POST':
         form = goalForm(request.POST)
@@ -198,48 +205,25 @@ def g1(request):
             send_mail(
                     'Your New Goal',
                     message,
-                    'puranikarnik@gmail.com',
+                    'wealthwise200@gmail.com',
                     [email],
                     fail_silently=False,
                 )
-            return redirect('g1')  # Redirect to prevent form resubmission
+            return redirect('g1')  
     else:
-        form = goalForm()  # Only initialize if it's not a POST request
+        form = goalForm()  
     context = {
         'user': user,
         'currency': user.currency,
-        'goal_form': form,
         'goals': goals,
+        'goal_form': form,
         'total_goals': total_goals,
         'total_amount': total_amount,
         'completed_amount': completed_amount,
         'pending_amount': pending_amount,
+        'savings': savings,
     }
     return render(request, 'WW/G.html', context)
-
-
-def b1(request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        messages.error(request, "You must be logged in.")
-        return redirect('signup')
-    user = User.objects.get(id=user_id)
-    bills = Bill.objects.filter(user=user)
-    total_bills = bills.count()
-    total_amount = sum(bill.amount for bill in bills)
-    paid_amount = sum(bill.amount for bill in bills if bill.is_paid)
-    pending_amount = total_amount - paid_amount
-    form = billForm()
-    return render(request, 'WW/b1.html', {
-        'user': user,
-        'currency': user.currency,
-        'bill_form': form,
-        'bills': bills,
-        'total_bills': total_bills,
-        'total_amount':  sum(bill.amount for bill in bills),
-        'paid_amount': paid_amount,
-        'pending_amount': pending_amount,
-    })
     
 def m_g(request, goal_id):
     user_id = request.session.get('user_id')
@@ -252,7 +236,7 @@ def m_g(request, goal_id):
     send_mail(
         'Goal Achieved',
         message,
-        'puranikarnik@gmail.com',
+        'wealthwise200@gmail.com',
         [email],
         fail_silently=False,
     )
@@ -282,23 +266,60 @@ def check_goal_progress(request):
     if not user_id:
         messages.error(request, "You must be logged in.")
         return redirect('signup')
+
     user = User.objects.get(id=user_id)
     completed_amount = sum(goal.amount for goal in Goal.objects.filter(user=user, is_done=True))
-    locked_amount = request.session.get('locked_amount', 0)
-    if completed_amount >= 0.5 * locked_amount:
+    
+    total_income = sum(income.amount for income in Income.objects.filter(user=user))
+    total_expense = sum(expense.amount for expense in Expense.objects.filter(user=user))
+    savings = total_income - total_expense
+
+    if savings >= 0.5 * completed_amount:
         email = user.email
-        message = f'Dear user, congratulations! You have achieved 50% of your locked goal amount of ${locked_amount}. Keep up the good work!'
+        message = f'''
+        🎉 Congratulations {user.name}! 🎉  
+
+        You have successfully saved {user.currency.symbol}{completed_amount}, which is 50% of your goal! Keep going strong!  
+
+        Every step brings you closer to financial freedom. 🚀  
+
+        Regards,  
+        Wealth-Wise Team
+        '''
         send_mail(
-            '50% Goal Achieved',
+            '50% Goal Achieved 🎯',
             message,
-            'puranikarnik@gmail.com',
+            'wealthwise200@gmail.com',
             [email],
             fail_silently=False,
         )
-        messages.success(request, 'Email sent for achieving 50% of the locked goal amount.')
-    return redirect('g1')
-
+        messages.success(request, 'Motivational email sent for achieving 50% of the goal.')
     
+    return redirect('g1')
+    
+def b1(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, "You must be logged in.")
+        return redirect('signup')
+    user = User.objects.get(id=user_id)
+    bills = Bill.objects.filter(user=user)
+    total_bills = bills.count()
+    total_amount = sum(bill.amount for bill in bills)
+    paid_amount = sum(bill.amount for bill in bills if bill.is_paid)
+    pending_amount = total_amount - paid_amount
+    form = billForm()
+    return render(request, 'WW/b1.html', {
+        'user': user,
+        'currency': user.currency,
+        'bill_form': form,
+        'bills': bills,
+        'total_bills': total_bills,
+        'total_amount':  sum(bill.amount for bill in bills),
+        'paid_amount': paid_amount,
+        'pending_amount': pending_amount,
+    })
+
 def add_bill(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -348,8 +369,6 @@ def mark_bill(request, bill_id):
         bill.save()
         return redirect('b1')
     
-import plotly.graph_objs as go
-import plotly.io as pio
 
 def report(request):
         user_id = request.session.get('user_id')

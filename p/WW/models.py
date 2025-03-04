@@ -64,6 +64,8 @@ class Bill(models.Model):
 class Goal(models.Model):
     currency= models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True,blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    incomes= models.ForeignKey(Income, on_delete=models.SET_NULL, null=True,blank=True)
+    expenses= models.ForeignKey(Expense,on_delete=models.SET_NULL, null=True,blank=True)
     goal_name = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     due_date = models.DateField()
