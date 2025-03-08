@@ -15,8 +15,12 @@ urlpatterns = [
     path('b1.html/add-bill/', views.add_bill, name='add_bill'),
     path('delete_bill/<int:bill_id>/', views.delete_bill, name='delete_bill'), 
     path('mark_bill/<int:bill_id>/', views.mark_bill, name="mark_bill"),
-    path('lock_goals/', views.lock_goals, name='lock_goals'),
     path('check_goal_progress/', views.check_goal_progress, name='check_goal_progress'),
     path('report.html/',views.report, name='report'),
     path('FAQ.html/',views.faq, name='faq'),
+    path('privacy.html/',views.privacy, name='privacy'),
+    path('security.html/',views.security, name='security'),
+    path('terms.html/',views.terms, name='terms'), 
+    path('support.html/',views.support,name='support'),
+    
 ]

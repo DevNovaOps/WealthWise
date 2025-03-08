@@ -5,115 +5,490 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Financial Goal Tracker</title>
-  <link rel="stylesheet" href="{% static 'G.css' %}">
 </head>
 <body>
   <div class="container">
-    <span>
-    <h1>Financial Goal Tracker</h1>
-    <a href="{% url 'home' %}" class="container1"> Home </a>
-    </span>
+    <header>
+      <h1>Financial Goal Tracker</h1>
+      <a href="{% url 'home' %}" class="nav-link">Home</a>
+    </header>
 
-    <!-- Stats Section -->
-    <div class="stats-container" method="GET" action = {% url 'g1' %}>
-      {% csrf_token %} 
+    <div class="quote-card">
+      <div class="quote-icon">💡</div>
+      <p class="quote-text">{{ quotes|random }}</p>
+    </div>
+
+    <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-title">Total Goals</div>
-        <div id="totalGoals" class="stat-value">{{total_goals}}</div>
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">{{ total_goals }}</div>
+        <div class="stat-label">Total Goals</div>
       </div>
+      
       <div class="stat-card">
-        <div class="stat-title">Total Target</div>
-        <div id="totalTarget" class="stat-value">{{user.currency.symbol}}{{total_amount}}</div>
+        <div class="stat-icon">💰</div>
+        <div class="stat-value">{{ user.currency.symbol }}{{ total_amount }}</div>
+        <div class="stat-label">Total Target</div>
       </div>
+      
       <div class="stat-card">
-        <div class="stat-title">Total Saved</div>
-        <div id="totalSaved" class="stat-value">{{user.currency.symbol}}{{savings}}</div>
+        <div class="stat-icon">💸</div>
+        <div class="stat-value">{{ user.currency.symbol }}{{ savings }}</div>
+        <div class="stat-label">Total Saved</div>
       </div>
     </div>
     
-    <form id="addGoalForm" method="POST" action = "{%  url 'g1'  %}" class="add-goal-form">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="goalName">Goal Name</label>
-        {{goal_form.goal_name}}
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>Overall Progress</span>
+        <span class="progress-percentage">{{ progress_percentage|floatformat:2 }}%</span>
       </div>
-      <div class="form-group">
-        <label for="targetAmount">Target Amount {{user.currency.symbol}}</label>
-        {{goal_form.amount}}
-      </div>
-      <div class="form-group">
-        <label for="targetDate">Target Date</label>
-        <input type="date" id="due_date" name="due_date" required>
-      </div>
-      <div class="form-group">
-      </div>
-      <div class="form-group">
-        <label>&nbsp;</label>
-        <div>
-        <button type="submit" id="addGoalButton">Add Goal</button>
-        <button type="button" id="lockGoalsButton" onclick="toggleLockGoals()">Lock Goals</button>
-        </div>
-      </div>
-    </form>
-
-  <div id="goalsList" class="goals-list">
-    {% for goal in goals %}
-    {% if goal.is_done %}
-      <div class="goal-item" id="goal-{{ goal.id }}">
-      <div class="goal-info">
-        <div class="goal-name">{{ goal.goal_name }}</div>
-        <div class="goal-details">Amount: {{user.currency.symbol}}{{ goal.amount }} | Due Date: {{ goal.due_date }}</div>
-      </div>
-      <div class="goal-actions">
-        <a href="{% url 'd_g' goal.id %}" class="container5"> Delete </a>
-      </div>
-    </div>       
-      {% else %}
-    <div class="goal-item" id="goal-{{ goal.id }}">
-      <div class="goal-info">
-        <div class="goal-name">{{ goal.goal_name }}</div>
-        <div class="goal-details">Amount: {{user.currency.symbol}}{{ goal.amount }} | Due Date: {{ goal.due_date }}</div>
-      </div>
-      <div class="bill-actions">
-        <a href="{% url 'm_g' goal.id %}" class="container4"> Mark as Paid </a>
-        <a href="{% url 'd_g' goal.id %}" class="container5"> Delete </a>
+      <div class="progress-container">
+        <div class="progress-bar" style="width: {{ progress_percentage }}%;"></div>
       </div>
     </div>
-    {% endif %}
-    {% endfor %}
 
-  <script>
+    <div class="card">
+      <div class="card-header">Add New Goal</div>
+      <form id="addGoalForm" method="POST" action="{% url 'g1' %}" class="add-goal-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="goalName">Goal Name</label>
+          {{ goal_form.goal_name }}
+        </div>
+        
+        <div class="form-group">
+          <label for="targetAmount">Target Amount {{ user.currency.symbol }}</label>
+          {{ goal_form.amount }}
+        </div>
+        
+        <div class="form-group">
+          <label for="targetDate">Target Date</label>
+          <input type="date" id="due_date" name="due_date" required>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" id="addGoalButton">Add Goal</button>
+          
+          {% if not all_goals_achieved %}
+          <a href="{% url 'check_goal_progress' %}" class="action-button">Check Progress</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
 
-      function toggleLockGoals() {
-      const addGoalButton = document.getElementById('addGoalButton');
-      const lockGoalsButton = document.getElementById('lockGoalsButton');
+    <div class="card">
+      <div class="card-header">Your Goals</div>
+      <div id="goalsList" class="goals-list">
+        {% for goal in goals %}
+        <div class="goal-item {% if goal.is_done %}completed{% endif %}" id="goal-{{ goal.id }}">
+          <div class="goal-info">
+            <div class="goal-name">{{ goal.goal_name }}</div>
+            <div class="goal-details">
+              <span class="goal-amount">{{ user.currency.symbol }}{{ goal.amount }}</span>
+              <span class="goal-date">Due: {{ goal.due_date }}</span>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+          <p>You haven't set any financial goals yet. Add your first goal above!</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 
-      if (addGoalButton.style.display === 'none') {
-        addGoalButton.style.display = 'inline-block';
-        lockGoalsButton.textContent = 'Lock Goals';
-      } else {
-        addGoalButton.style.display = 'none';
-        lockGoalsButton.textContent = 'Unlock Goals';
+  <style>
+    :root {
+      --dark-bg: #121212;
+      --card-bg: rgba(22, 22, 22, 0.7);
+      --hover-bg: #232323;
+      --text-color: #e0e0e0;
+      --muted-text: #a0a0a0;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary-green: #00ff41;
+      --secondary-blue: #0984e3;
+      --danger-red: #ff4757;
+      --warning-orange: #ffa502;
+      --glow-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding: 20px;
+      background-image: linear-gradient(to bottom, #121212, #0c0c0c);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px 0;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--primary-green);
+      font-weight: 700;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+      letter-spacing: 1px;
+    }
+
+    .nav-link {
+      padding: 8px 16px;
+      background-color: transparent;
+      color: var(--primary-green);
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid var(--primary-green);
+      font-size: 0.9rem;
+      box-shadow: var(--glow-shadow);
+    }
+
+    .nav-link:hover {
+      background-color: var(--primary-green);
+      color: var(--dark-bg);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--primary-green);
+      background-color: rgba(0, 255, 65, 0.05);
+    }
+
+    .quote-card {
+      background: linear-gradient(45deg, rgba(9, 132, 227, 0.2), rgba(0, 255, 65, 0.2));
+      color: var(--text-color);
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .quote-icon {
+      font-size: 24px;
+      margin-right: 15px;
+      color: var(--primary-green);
+    }
+
+    .quote-text {
+      font-size: 0.95rem;
+      font-style: italic;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .stat-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+      border-color: var(--primary-green);
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted-text);
+    }
+
+    .progress-section {
+      padding: 15px 20px;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: var(--muted-text);
+    }
+
+    .progress-percentage {
+      color: var(--primary-green);
+      font-weight: 600;
+    }
+
+    .progress-container {
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--secondary-blue), var(--primary-green));
+      border-radius: 10px;
+      transition: width 1s ease-in-out;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+    }
+
+    .add-goal-form {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: var(--muted-text);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-color);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-green);
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button, .action-button {
+      background-color: transparent;
+      color: var(--primary-green);
+      border: 1px solid var(--primary-green);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+      font-size: 0.9rem;
+      min-width: 120px;
+      box-shadow: var(--glow-shadow);
+    }
+
+    button:hover, .action-button:hover {
+      background-color: var(--primary-green);
+      color: var(--dark-bg);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+    }
+
+    .action-button {
+      background-color: transparent;
+      border-color: var(--secondary-blue);
+      color: var(--secondary-blue);
+      box-shadow: 0 0 15px rgba(9, 132, 227, 0.2);
+    }
+
+    .action-button:hover {
+      background-color: var(--secondary-blue);
+      color: var(--dark-bg);
+      box-shadow: 0 0 20px rgba(9, 132, 227, 0.4);
+    }
+
+    .goals-list {
+      padding: 5px 15px 15px;
+    }
+
+    .goal-item {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    .goal-item:last-child {
+      border-bottom: none;
+    }
+
+    .goal-item:hover {
+      background-color: var(--hover-bg);
+      transform: translateX(5px);
+    }
+
+    .goal-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-color);
+    }
+
+    .goal-details {
+      display: flex;
+      gap: 15px;
+      font-size: 0.85rem;
+      color: var(--muted-text);
+    }
+
+    .goal-amount {
+      color: var(--primary-green);
+    }
+
+    .completed {
+      border-left: 3px solid var(--primary-green);
+      background-color: rgba(0, 255, 65, 0.05);
+    }
+
+    .empty-state {
+      padding: 20px;
+      text-align: center;
+      color: var(--muted-text);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px rgba(0, 255, 65, 0.2); }
+      50% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.4); }
+      100% { box-shadow: 0 0 5px rgba(0, 255, 65, 0.2); }
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .goal-details {
+        flex-direction: column;
+        gap: 5px;
       }
     }
+  </style>
 
-    function lockGoals() {
-      fetch("{% url 'lock_goals' %}", {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': '{{ csrf_token }}',
-          'Content-Type': 'application/json'
-        },
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          document.getElementById('addGoalButton').style.display = 'none';
-          document.getElementById('lockGoalsButton').textContent = 'Unlock Goals';
-        }
-      });
+  <script>
+    function updateProgressBar(percentage) {
+      let progressBar = document.querySelector('.progress-bar');
+      progressBar.style.width = percentage + "%";
     }
     
+    updateProgressBar({{ progress_percentage }});
+    
+    const quotes = [
+      "Do not save what is left after spending, but spend what is left after saving. – Warren Buffett",
+      "The goal isn't more money. The goal is living life on your terms. – Chris Brogan",
+      "A penny saved is a penny earned. – Benjamin Franklin",
+      "Financial freedom is available to those who learn about it and work for it. – Robert Kiyosaki",
+      "Wealth consists not in having great possessions, but in having few wants. – Epictetus",
+      "Do something today that your future self will thank you for.",
+      "If you want to be rich, simply serve more people. – Robert Kiyosaki",
+      "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
+      "An investment in knowledge pays the best interest. – Benjamin Franklin",
+      "The best way to predict the future is to create it. – Peter Drucker",
+      "Savings, even in small amounts, lead to financial freedom in the long run.",
+      "Your financial future depends on what you do today, not tomorrow.",
+    ];
+
+    let quoteIndex = 0;
+    const quoteElement = document.querySelector(".quote-text");
+
+    function changeQuote() {
+      quoteElement.style.animation = "fadeOut 1s";
+      
+      setTimeout(() => {
+        quoteIndex = (quoteIndex + 1) % quotes.length;
+        quoteElement.textContent = quotes[quoteIndex];
+        quoteElement.style.animation = "fadeIn 1s";
+      }, 1000);
+    }
+
+    setInterval(changeQuote, 10000);
   </script>
 </body>
 </html>

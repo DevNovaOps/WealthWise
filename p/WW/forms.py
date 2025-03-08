@@ -53,9 +53,29 @@ class ExpenseForm(forms.ModelForm):
         ('🎬 Entertainment', '🎬 Entertainment'),
         ('⚕ Healthcare', '⚕ Healthcare'),
         ('📚 Education', '📚 Education'),
+        ('✈ Travel', '✈ Travel'),
+        ('🐾 Pets', '🐾 Pets'),
+        ('🎁 Gifts', '🎁 Gifts'),
+        ('💼 Business', '💼 Business'),
+        ('🏦 Savings', '🏦 Savings'),
+        ('🍽 Dining Out', '🍽 Dining Out'),
+        ('🏋 Fitness', '🏋 Fitness'),
+        ('🛠 Home Improvement', '🛠 Home Improvement'),
+        ('🎨 Hobbies', '🎨 Hobbies'),
+        ('🍼 Childcare', '🍼 Childcare'),
+        ('💻 Subscriptions', '💻 Subscriptions'),
+        ('🚿 Personal Care', '🚿 Personal Care'),
+        ('🎓 Student Loans', '🎓 Student Loans'),
+        ('🚑 Insurance', '🚑 Insurance'),
+        ('💳 Credit Card Payments', '💳 Credit Card Payments'),
+        ('🏖 Vacation', '🏖 Vacation'),
+        ('📱 Mobile Phone', '📱 Mobile Phone'),
+        ('💼 Professional Services', '💼 Professional Services'),
+        ('🎉 Parties', '🎉 Parties'),
+        ('🚰 Water', '🚰 Water'),
+        ('🔌 Electricity', '🔌 Electricity'),
         ('📦 Other', '📦 Other')
     ]
-    
     category = forms.ChoiceField(choices=EXPENSE_CATEGORIES, widget=forms.Select(attrs={'class': 'form-control'}))
     amount = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter amount'}))
     

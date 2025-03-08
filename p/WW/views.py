@@ -8,13 +8,26 @@ from django.urls import reverse
 import re
 import plotly.graph_objs as go
 import plotly.io as pio
+from random import choice
 
 
 def home(request):
     return render(request, 'WW/home.html')
 
+def security(request):
+    return render(request,'WW/security.html')
+
+def terms(request):
+    return render(request,'WW/terms.html')
+
+def privacy(request):
+    return render(request,'WW/privacy.html')
+
 def faq(request):
     return render(request, 'WW/FAQ.html')
+
+def support(request):
+    return render(request,'WW/support.html')
 
 def signup(request):
     if request.session.get('user_id'):
@@ -178,11 +191,13 @@ def g1(request):
     if not user_id:
         messages.error(request, "You must be logged in.")
         return redirect('signup')
+
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         messages.error(request, "User not found.")
         return redirect('signup')
+
     goals = Goal.objects.filter(user=user)
     total_goals = goals.count()
     total_amount = sum(goal.amount for goal in goals)
@@ -190,28 +205,35 @@ def g1(request):
     total_income = sum(income.amount for income in Income.objects.filter(user=user))
     total_expense = sum(expense.amount for expense in Expense.objects.filter(user=user))
     savings = total_income - total_expense  
+    progress_percentage = (savings / total_amount) * 100 if total_amount > 0 else 0
 
     pending_amount = total_amount - completed_amount
+    if savings >= total_amount:
+        goals.delete()
+        messages.success(request, "All goals achieved! Your goals have been cleared.")
+
     if request.method == 'POST':
         form = goalForm(request.POST)
         if form.is_valid():
             goal = form.save(commit=False)
             goal.user = user
             goal.save()
-            email = goal.user.email
-            user = User.objects.get(email=email)
-            user.save()
-            message = f'Dear user, your new goal {goal.goal_name} of {goal.amount} has been added successfully!\n\nBelow are the goal details:\n\nGoal Name: {goal.goal_name}\nAmount: {goal.amount}\nDue Date: {goal.due_date}\n'
+            
+            message = f'Dear user, your new goal "{goal.goal_name}" of {goal.amount} has been added successfully!\n\nGoal Details:\n- Goal Name: {goal.goal_name}\n- Amount: {goal.amount}\n- Due Date: {goal.due_date}'
+            
             send_mail(
-                    'Your New Goal',
-                    message,
-                    'wealthwise200@gmail.com',
-                    [email],
-                    fail_silently=False,
-                )
+                'Your New Goal',
+                message,
+                'wealthwise200@gmail.com',
+                [user.email],
+                fail_silently=False,
+            )
             return redirect('g1')  
     else:
         form = goalForm()  
+
+    
+    
     context = {
         'user': user,
         'currency': user.currency,
@@ -221,82 +243,89 @@ def g1(request):
         'total_amount': total_amount,
         'completed_amount': completed_amount,
         'pending_amount': pending_amount,
+        'progress_percentage':progress_percentage,
         'savings': savings,
+        'all_goals_achieved': savings >= total_amount
     }
-    return render(request, 'WW/G.html', context)
     
+    return render(request, 'WW/G.html', context)
+
+
 def m_g(request, goal_id):
+    """ Mark goal as achieved """
     user_id = request.session.get('user_id')
     user = User.objects.get(id=user_id)
     goal = get_object_or_404(Goal, id=goal_id, user=user)
+    
     goal.is_done = True
     goal.save()
-    email = goal.user.email
-    message = f'Dear user, congratulations on achieving your goal {goal.goal_name} of {goal.amount}! \n\nKindly note that we are closing the goal from our side.'
+
+    message = f'Dear user, congratulations on achieving your goal "{goal.goal_name}" of {goal.amount}!\nWe have marked this goal as completed.'
     send_mail(
         'Goal Achieved',
         message,
         'wealthwise200@gmail.com',
-        [email],
+        [user.email],
         fail_silently=False,
     )
+
     return redirect('g1')
 
+
 def d_g(request, goal_id):
+    """ Delete a goal """
     user_id = request.session.get('user_id')
     user = User.objects.get(id=user_id)
     goal = get_object_or_404(Goal, id=goal_id, user=user)
     goal.delete()
     return redirect('g1')
 
-def lock_goals(request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        messages.error(request, "You must be logged in.")
-        return redirect('signup')
-    user = User.objects.get(id=user_id)
-    goals = Goal.objects.filter(user=user, is_done=False)
-    total_amount = sum(goal.amount for goal in goals)
-    request.session['locked_amount'] = float(total_amount)
-    messages.success(request, f'Goals locked with a total amount of ${total_amount}.')
-    return redirect('g1')
-
 def check_goal_progress(request):
+    """ Check goal progress and send motivational emails """
     user_id = request.session.get('user_id')
     if not user_id:
         messages.error(request, "You must be logged in.")
         return redirect('signup')
 
     user = User.objects.get(id=user_id)
-    completed_amount = sum(goal.amount for goal in Goal.objects.filter(user=user, is_done=True))
-    
+    goals = Goal.objects.filter(user=user, is_done=True)
+    total_amount = sum(goal.amount for goal in Goal.objects.filter(user=user))
     total_income = sum(income.amount for income in Income.objects.filter(user=user))
     total_expense = sum(expense.amount for expense in Expense.objects.filter(user=user))
-    savings = total_income - total_expense
+    savings = total_income - total_expense  
 
-    if savings >= 0.5 * completed_amount:
-        email = user.email
-        message = f'''
-        🎉 Congratulations {user.name}! 🎉  
 
-        You have successfully saved {user.currency.symbol}{completed_amount}, which is 50% of your goal! Keep going strong!  
+    if total_amount == 0:
+        messages.error(request, "No financial goals found.")
+        return redirect('g1')
 
-        Every step brings you closer to financial freedom. 🚀  
-
-        Regards,  
-        Wealth-Wise Team
-        '''
-        send_mail(
-            '50% Goal Achieved 🎯',
-            message,
-            'wealthwise200@gmail.com',
-            [email],
-            fail_silently=False,
-        )
-        messages.success(request, 'Motivational email sent for achieving 50% of the goal.')
+    progress_percentage = (savings/ total_amount) * 100
     
+    if progress_percentage < 25:
+        motivation = "You're off to a great start! Keep pushing towards your financial goals. Every small step counts!"
+    elif progress_percentage < 50:
+        motivation = "You're making good progress! Stay consistent, and you'll achieve your goals soon."
+    elif progress_percentage < 75:
+        motivation = "You're over halfway there! Keep saving and investing wisely."
+    elif progress_percentage < 100:
+        motivation = "Almost there! Stay focused, and soon you'll reach your financial target."
+    else:
+        motivation = "Congratulations! You've successfully achieved your goal. Time to set new financial milestones!"
+
+    message = f"Dear {user.name},\n\nYou have completed {progress_percentage:.2f}% of your financial goal. {motivation}\n\nKeep up the good work!\n\nBest,\nWealth-Wise Team"
+
+    send_mail(
+        'Goal Progress Update',
+        message,
+        'wealthwise200@gmail.com',
+        [user.email],
+        fail_silently=False,
+    )
+
+    messages.success(request, f'Email sent for achieving {progress_percentage:.2f}% of your goal.')
+
     return redirect('g1')
-    
+
 def b1(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -378,14 +407,13 @@ def report(request):
 
         user = User.objects.get(id=user_id)
         currency = getattr(user, 'currency', 'USD')
-
+        completed_amount = sum(goal.amount for goal in Goal.objects.filter(user=user, is_done=True))
         incomes = Income.objects.filter(user=user)
         expenses = Expense.objects.filter(user=user)
 
         total_income = sum(income.amount for income in incomes)
         total_expense = sum(expense.amount for expense in expenses)
         savings = total_income - total_expense
-
         months = ["January", "February", "March", "April", "May", "June", "July",
                   "August", "September", "October", "November", "December"]
         income_values = [sum(i.amount for i in incomes if i.month == month) for month in months]
@@ -424,5 +452,5 @@ def report(request):
             'savings': savings,
             'bar_graph': bar_graph,
             'line_graph': line_graph,
-            'pie_chart': pie_chart
+            'pie_chart': pie_chart,
         })
