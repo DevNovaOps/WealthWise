@@ -1,13 +1,17 @@
 from django.urls import path  
 from . import views
+
 urlpatterns = [
     path('', views.home, name='home'),
     path('signup/', views.signup, name='signup'),
     path('logout/', views.logout, name='logout'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('verify-otp/',views.verify_otp, name='verify_otp'),
     path('i1.html/',views.i1, name='i1'),
     path('i1.html/add-income/', views.add_income, name='add_income'),
     path('i1.html/add-expense/', views.add_expense, name='add_expense'),
+    path('i1.html/delete_income/<int:income_id>/', views.delete_income, name='delete_income'), 
+    path('i1.html/delete_expense/<int:expense_id>/', views.delete_expense, name='delete_expense'),
     path('G.html/', views.g1, name='g1'),
     path('m_g/<int:goal_id>/', views.m_g, name='m_g'),
     path('de_g/<int:goal_id>/', views.d_g, name='d_g'),

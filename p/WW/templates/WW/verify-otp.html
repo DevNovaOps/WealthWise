@@ -1,16 +1,25 @@
-:root {
-    --dark-bg: #121212;
-    --card-bg: rgba(22, 22, 22, 0.7);
-    --hover-bg: #232323;
-    --text-color: #e0e0e0;
-    --muted-text: #a0a0a0;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --primary-green: #00ff41;
-    --secondary-blue: #0984e3;
-    --danger-red: #ff4757;
-    --warning-orange: #ffa502;
-    --glow-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
-}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    {% comment %} <link rel="stylesheet" href="{% static 'forgot-password.css' %}"> {% endcomment %}
+    <style>
+        :root {
+            --dark-bg: #121212;
+            --card-bg: rgba(22, 22, 22, 0.7);
+            --hover-bg: #232323;
+            --text-color: #e0e0e0;
+            --muted-text: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary-green: #00ff41;
+            --secondary-blue: #0984e3;
+            --danger-red: #ff4757;
+            --warning-orange: #ffa502;
+            --glow-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
 * {
     margin: 0;
     padding: 0;
@@ -201,3 +210,27 @@ button:active {
         padding: 12px 20px;
     }
 }
+    </style>
+    
+    </style>
+</head>
+<body>
+    <div class="background">
+        <img src="{% static 'Back.jpg' %}" alt="">
+    </div>
+    <div class="container">
+        <div class="form-container">
+            <form class="form" method="POST">
+                {% csrf_token %}
+                <h1>Verify OTP</h1>
+                <p class="description">Enter the OTP sent to your email</p>
+                {{ otp_form.as_p }}
+                <button type="submit">Verify & Reset Password</button>
+                <div class="links">
+                    <a href="{% url 'forgot_password' %}">Resend OTP</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

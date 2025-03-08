@@ -2,15 +2,14 @@ from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.hashers import make_password,check_password
 from django.core.mail import send_mail 
 from django.contrib import messages
-from .forms import SignupForm, LoginForm, ForgotPasswordForm, IncomeForm, ExpenseForm,billForm,goalForm
+from .forms import SignupForm, LoginForm, ForgotPasswordForm, OTPVerificationForm, IncomeForm, ExpenseForm,billForm,goalForm
 from .models import User, Income, Expense,Bill,Goal
 from django.urls import reverse
 import re
 import plotly.graph_objs as go
-import plotly.io as pio
-from random import choice
-from django.utils.cache import add_never_cache_headers
+import plotly.io as pio    
 from django.views.decorators.cache import never_cache
+import random
 
 @never_cache
 def home(request):
@@ -30,7 +29,6 @@ def faq(request):
 
 def support(request):
     return render(request,'WW/support.html')
-
 
 
 def signup(request):
@@ -78,6 +76,16 @@ def signup(request):
                     user = signup_form.save(commit=False)
                     user.password = make_password(password)
                     user.save()
+
+                    send_mail(
+                        'Welcome to Wealth-Wise',
+                        f'Dear {user.name},\n\nThank you for signing up with Wealth-Wise! We are excited to have you on board. '
+                        'You can now log in and start managing your finances effectively.\n\nBest regards,\nThe Wealth-Wise Team',
+                        'wealthwise200@gmail.com',
+                        [user.email],
+                        fail_silently=False,
+                    )
+
                     messages.success(request, "Account created successfully. Please log in.")
                     return redirect('home')
 
@@ -90,7 +98,6 @@ def signup(request):
         'show_signup': show_signup,
     })
 
-
 def forgot_password(request):
     if request.method == 'POST':
         form = ForgotPasswordForm(request.POST)
@@ -98,24 +105,64 @@ def forgot_password(request):
             email = form.cleaned_data['email']
             try:
                 user = User.objects.get(email=email)
-                new_password = form.cleaned_data['password']
-                user.password = make_password(new_password)
-                user.save()
+                otp = str(random.randint(100000, 999999))
+
+                request.session['reset_email'] = email
+                request.session['otp'] = otp
+
                 send_mail(
-                    'Your New Password',
-                    f'Your new password is: {new_password}',
+                    'Password Reset Request',
+                    f'Dear user,\n\nWe received a request to reset your password. Your OTP for password reset is: {otp}\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nWealthwise Team',
                     'wealthwise200@gmail.com',
                     [email],
                     fail_silently=False,
                 )
-                messages.success(request, 'A new password has been sent to your email.')
-                return redirect('signup')
+
+                return redirect('verify_otp')  
             except User.DoesNotExist:
                 form.add_error('email', 'User does not exist.')
     else:
         form = ForgotPasswordForm()
 
     return render(request, 'WW/forgot-password.html', {'forgot_password_form': form})
+
+def verify_otp(request):
+        email = request.session.get('reset_email')
+        otp_sent = request.session.get('otp')
+
+        if not email or not otp_sent:
+            messages.error(request, 'Session expired. Please try again.')
+            return redirect('forgot_password')
+
+        if request.method == 'POST':
+            form = OTPVerificationForm(request.POST)
+            if form.is_valid():
+                otp_entered = form.cleaned_data['otp']
+                if otp_entered == otp_sent:
+                    new_password = form.cleaned_data['new_password']
+                    user = User.objects.get(email=email)
+                    user.password = make_password(new_password)
+                    user.save()
+
+                    del request.session['reset_email']
+                    del request.session['otp']
+
+                    send_mail(
+                        'Password Reset Successful',
+                        f'Dear {user.name},\n\nYour password has been successfully reset. Your new password is: {new_password}\n\nPlease keep this information secure and do not share it with anyone.\n\nBest regards,\nWealth-Wise Team',
+                        'wealthwise200@gmail.com',
+                        [user.email],
+                        fail_silently=False,
+                    )
+
+                    messages.success(request, 'Password reset successful. You can now log in.')
+                    return redirect('signup')
+                else:
+                    form.add_error('otp', 'Invalid OTP. Please try again.')
+        else:
+            form = OTPVerificationForm()
+
+        return render(request, 'WW/verify-otp.html', {'otp_form': form})
 
 @never_cache
 def i1(request):  
@@ -139,6 +186,9 @@ def i1(request):
     total_expense_percentage = (total_expense / total_income * 100) if total_income else 0
     savings_percentage = (savings / total_income * 100) if total_income else 0
 
+    total_expense_percentage = min(max(total_expense_percentage, 0), 100)
+    savings_percentage = min(max(savings_percentage, 0), 100)
+
     return render(request, 'WW/i1.html', {
         'user': user,
         'selected_month': selected_month,
@@ -152,7 +202,6 @@ def i1(request):
         'income_form': IncomeForm(),
         'expense_form': ExpenseForm(),
     })
-
 
 def add_income(request):
     user_id = request.session.get('user_id')
@@ -172,10 +221,9 @@ def add_income(request):
         else:
             messages.error(request, 'Please correct the errors.')
     
-  
     selected_month = request.POST.get('month', 'January')
     return redirect(reverse('i1') + f'?month={selected_month}')
-
+    
 def add_expense(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -186,16 +234,40 @@ def add_expense(request):
     if request.method == 'POST':
         form = ExpenseForm(request.POST)
         if form.is_valid():
-            expense = form.save(commit=False)
-            expense.user = user
-            expense.month = request.POST.get('month', 'January') 
+            expense = form.save(commit=False, user=user)
+            expense.month = request.POST.get('month', 'January')  
             expense.save()
             messages.success(request, 'Expense added successfully!')
         else:
             messages.error(request, 'Please correct the errors.')
-    
+
     selected_month = request.POST.get('month', 'January')
     return redirect(reverse('i1') + f'?month={selected_month}')
+
+
+def delete_income(request, income_id):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, "You must be logged in.")
+        return redirect('signup')
+    
+    income = get_object_or_404(Income, id=income_id, user_id=user_id)
+    income.delete()
+    messages.success(request, 'Income deleted successfully!')
+    
+    return redirect(reverse('i1') + f'?month={income.month}')
+
+def delete_expense(request, expense_id):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, "You must be logged in.")
+        return redirect('signup')
+    
+    expense = get_object_or_404(Expense, id=expense_id, user_id=user_id)
+    expense.delete()
+    messages.success(request, 'Expense deleted successfully!')
+    
+    return redirect(reverse('i1') + f'?month={expense.month}')
 
 
 def logout(request):
@@ -237,6 +309,7 @@ def g1(request):
     total_expense = sum(expense.amount for expense in Expense.objects.filter(user=user))
     savings = total_income - total_expense  
     progress_percentage = (savings / total_amount) * 100 if total_amount > 0 else 0
+    progress_percentage = min(max(progress_percentage, 0), 100)
 
     pending_amount = total_amount - completed_amount
     if savings >= total_amount:
@@ -356,6 +429,7 @@ def check_goal_progress(request):
     messages.success(request, f'Email sent for achieving {progress_percentage:.2f}% of your goal.')
 
     return redirect('g1')
+
 @never_cache
 def b1(request):
     user_id = request.session.get('user_id')
