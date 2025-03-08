@@ -21,7 +21,21 @@
             --warning-orange: #ffa502;
             --glow-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
         }
-        
+
+        .nav-link {
+            padding: 8px 16px;
+            background-color: transparent;
+            color: var(--primary-green);
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-green);
+            font-size: 0.9rem;
+            box-shadow: var(--glow-shadow);
+            margin-left:600px;
+          }
+      
         /* Basic Reset */
         * {
             margin: 0;
@@ -658,8 +672,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 255, 65, 0.5);
         }
-        
-        /* Responsive Adjustments */
         @media (max-width: 768px) {
             .summary-cards {
                 grid-template-columns: 1fr;
@@ -765,6 +777,13 @@
         .summary-card.tilt-effect:hover {
             transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateZ(20px);
         }
+        .nav-link:hover {
+            background-color: var(--primary-green);
+            color: var(--dark-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+          }
+      
     </style>
 </head>
 <body>
@@ -776,7 +795,7 @@
     <div class="container">
         <div class="header">
             <h1>Expense Tracker</h1>
-            <select id="monthSelector" onchange="changeMonth()">
+            <select id="monthSelector" onchange="changeMonth()" class="nav-link">
                 <option value="January" {% if selected_month == 'January' %}selected{% endif %}>January</option>
                 <option value="February" {% if selected_month == 'February' %}selected{% endif %}>February</option>
                 <option value="March" {% if selected_month == 'March' %}selected{% endif %}>March</option>
@@ -789,7 +808,8 @@
                 <option value="October" {% if selected_month == 'October' %}selected{% endif %}>October</option>
                 <option value="November" {% if selected_month == 'November' %}selected{% endif %}>November</option>
                 <option value="December" {% if selected_month == 'December' %}selected{% endif %}>December</option>
-            </select>        
+            </select>
+            <a href="{% url 'home' %}" class="nav-link" style="margin-left: 20px;">Home</a>
         </div><div class="summary-cards">
         <div class="summary-card">
             <div class="card-title">Total Income</div>

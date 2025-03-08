@@ -43,22 +43,24 @@
         }
         
         .container1 {
-            display: block;
-            margin-left: 320px;
-            padding: 10px 20px; 
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            text-align: center;
+            margin-left:320px;
+            padding: 8px 16px;
+            background-color: transparent;
+            color: var(--primary-green);
             text-decoration: none;
             border-radius: 4px;
-            transition: all 0.3s;
-            display: inline-block;
-            border: 1px solid var(--border-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-green);
+            font-size: 0.9rem;
+            box-shadow: var(--glow-shadow);
         }
         
         .container1:hover {
-            background-color: var(--hover-bg);
-            box-shadow: var(--glow-shadow);
+            background-color: var(--primary-green);
+            color: var(--dark-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
         }
 
         .container2 {
@@ -307,16 +309,42 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--dark-bg);
+            background-image: url('https://cdn-icons-png.flaticon.com/512/747/747310.png');
+            background-size: 18px;
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+          }
+      
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(50%) sepia(100%) saturate(1000%) hue-rotate(90deg);
+          }
+          input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+          }
     </style>
 </head>
 <body>
     <div class="container">
         <span>
-        <h1>Bill Payment Reminder</h1>
-        <a href="{% url 'home' %}" class="container1"> Home </a>
-        </span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>Bill Payment Reminder</h1>
+            <a href="{% url 'home' %}" class="container1"> Home </a>
+        </div>
 
-        <!-- Stats Section -->
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-title">Total Bills</div>
@@ -380,5 +408,18 @@
             {% endfor %}
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let dueDateInput = document.getElementById("dueDate");
+    
+            let today = new Date();
+            let yyyy = today.getFullYear();
+            let mm = String(today.getMonth() + 1).padStart(2, '0'); 
+            let dd = String(today.getDate()).padStart(2, '0');
+            let minDate = `${yyyy}-${mm}-${dd}`;
+            dueDateInput.setAttribute("min", minDate);
+        });
+    </script>
+    
 </body>
 </html>

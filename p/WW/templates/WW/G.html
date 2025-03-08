@@ -64,7 +64,7 @@
         
         <div class="form-group">
           <label for="targetDate">Target Date</label>
-          <input type="date" id="due_date" name="due_date" required>
+          <input type="date" id="dueDate" name="due_date" required>
         </div>
         
         <div class="form-actions">
@@ -450,9 +450,46 @@
         gap: 5px;
       }
     }
+    
+    input[type="date"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--dark-bg);
+      background-image: url('https://cdn-icons-png.flaticon.com/512/747/747310.png');
+      background-size: 18px;
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(50%) sepia(100%) saturate(1000%) hue-rotate(90deg);
+    }
+    input[type="date"]:focus {
+      outline: none;
+      border-color: var(--primary-green);
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
   </style>
 
   <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      let dueDateInput = document.getElementById("dueDate");
+
+      let today = new Date();
+      let yyyy = today.getFullYear();
+      let mm = String(today.getMonth() + 1).padStart(2, '0'); 
+      let dd = String(today.getDate()).padStart(2, '0');
+      let minDate = `${yyyy}-${mm}-${dd}`;
+      dueDateInput.setAttribute("min", minDate);
+  });
+
     function updateProgressBar(percentage) {
       let progressBar = document.querySelector('.progress-bar');
       progressBar.style.width = percentage + "%";
@@ -473,6 +510,14 @@
       "The best way to predict the future is to create it. – Peter Drucker",
       "Savings, even in small amounts, lead to financial freedom in the long run.",
       "Your financial future depends on what you do today, not tomorrow.",
+      "The art is not in making money, but in keeping it. – Proverb",
+      "It's not about having lots of money. It's knowing how to manage it. – Anonymous",
+      "The more you learn, the more you earn. – Warren Buffett",
+      "Financial peace isn't the acquisition of stuff. It's learning to live on less than you make. – Dave Ramsey",
+      "A budget is telling your money where to go instead of wondering where it went. – Dave Ramsey",
+      "The quickest way to double your money is to fold it in half and put it back in your pocket. – Will Rogers",
+      "The habit of saving is itself an education. – T.T. Munger",
+      "The secret to getting ahead is getting started. – Mark Twain"
     ];
 
     let quoteIndex = 0;

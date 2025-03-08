@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect,get_object_or_404
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password,check_password
 from django.core.mail import send_mail 
 from django.contrib import messages
 from .forms import SignupForm, LoginForm, ForgotPasswordForm, IncomeForm, ExpenseForm,billForm,goalForm
@@ -9,8 +9,10 @@ import re
 import plotly.graph_objs as go
 import plotly.io as pio
 from random import choice
+from django.utils.cache import add_never_cache_headers
+from django.views.decorators.cache import never_cache
 
-
+@never_cache
 def home(request):
     return render(request, 'WW/home.html')
 
@@ -29,12 +31,17 @@ def faq(request):
 def support(request):
     return render(request,'WW/support.html')
 
+
+
 def signup(request):
     if request.session.get('user_id'):
         messages.info(request, 'You are already logged in.')
         return redirect('home')
+
     login_form = LoginForm()
     signup_form = SignupForm()
+    show_signup = False  
+
     if request.method == 'POST':
         if 'login' in request.POST:
             login_form = LoginForm(request.POST)
@@ -50,31 +57,39 @@ def signup(request):
                         login_form.add_error('password', 'Incorrect password.')
                 except User.DoesNotExist:
                     login_form.add_error('email', 'User does not exist.')
-            else:
-                for field in login_form.errors:
-                    messages.error(request, f"{field}: {login_form.errors[field]}")
 
         elif 'signup' in request.POST:
             signup_form = SignupForm(request.POST)
             if signup_form.is_valid():
+                name = signup_form.cleaned_data['name']
                 password = signup_form.cleaned_data['password']
-                if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', password):
-                    signup_form.add_error('password', 'Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character.')
-                    return render(request,'WW/error.html')
-                else:
+                error_in_criteria = False  
+
+                if any(char.isdigit() for char in name):
+                    signup_form.add_error('name', 'Name cannot contain numbers.')
+                    error_in_criteria = True
+
+                password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{8,}$'
+                if not re.match(password_regex, password):
+                    signup_form.add_error('password', 'Password must have at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character.')
+                    error_in_criteria = True
+
+                if not error_in_criteria:
                     user = signup_form.save(commit=False)
                     user.password = make_password(password)
                     user.save()
                     messages.success(request, "Account created successfully. Please log in.")
                     return redirect('home')
-            else:
-                for field in signup_form.errors:
-                    messages.error(request, f"{field}: {signup_form.errors[field]}")
+
+        
+            show_signup = True  
 
     return render(request, 'WW/signup.html', {
         'login_form': login_form,
         'signup_form': signup_form,
+        'show_signup': show_signup,
     })
+
 
 def forgot_password(request):
     if request.method == 'POST':
@@ -102,9 +117,11 @@ def forgot_password(request):
 
     return render(request, 'WW/forgot-password.html', {'forgot_password_form': form})
 
-
+@never_cache
 def i1(request):  
     user_id = request.session.get('user_id')  
+    if 'user_id' not in request.session:
+        return redirect('signup')
     if not user_id:  
         messages.error(request, "You must be logged in.")  
         return redirect('signup') 
@@ -180,14 +197,28 @@ def add_expense(request):
     selected_month = request.POST.get('month', 'January')
     return redirect(reverse('i1') + f'?month={selected_month}')
 
+
 def logout(request):
     if request.session.get('user_id'):
         del request.session['user_id']
-        messages.success(request, 'You have been logged out.')  
-    return redirect('home')
+        request.session.flush()
+        messages.success(request, 'You have been logged out.')
+    else:
+        messages.error(request, 'You are not logged in.')
 
+    request.session.modified = True
+
+    response = redirect('home')
+    response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    
+    return response
+
+@never_cache
 def g1(request):
     user_id = request.session.get('user_id')
+
     if not user_id:
         messages.error(request, "You must be logged in.")
         return redirect('signup')
@@ -325,7 +356,7 @@ def check_goal_progress(request):
     messages.success(request, f'Email sent for achieving {progress_percentage:.2f}% of your goal.')
 
     return redirect('g1')
-
+@never_cache
 def b1(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -398,7 +429,7 @@ def mark_bill(request, bill_id):
         bill.save()
         return redirect('b1')
     
-
+@never_cache
 def report(request):
         user_id = request.session.get('user_id')
         if not user_id:

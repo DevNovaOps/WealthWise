@@ -134,6 +134,61 @@
         </div>
     </footer>
 
-    <script src="{% static 'home.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const servicesToggle = document.querySelector('.services-toggle');
+            const servicesItem = document.querySelector('.services-item');
+            servicesToggle.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                servicesItem.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (!servicesItem.contains(e.target) && !servicesToggle.contains(e.target)) {
+                    servicesItem.classList.remove('active');
+                }
+            });
+            const hamburger = document.querySelector('.hamburger');
+            const navbarMenu = document.querySelector('.navbar-menu');
+        
+            hamburger.addEventListener('click', () => {
+                navbarMenu.classList.toggle('active');
+                hamburger.classList.toggle('active');
+            });
+            const dropdownToggles = document.querySelectorAll('.about-toggle, .services-toggle, .contact-toggle');
+        
+            dropdownToggles.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const dropdown = item.nextElementSibling;
+                    dropdown.classList.toggle('active'); 
+                });
+            });
+        
+            document.addEventListener('click', (e) => {
+                dropdownToggles.forEach(item => {
+                    const dropdown = item.nextElementSibling;
+                    if (!item.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+            });
+            function toggleMenu() {
+                navbarMenu.classList.toggle('active');
+                hamburger.classList.toggle('active');
+            }
+            hamburger.addEventListener('click', () => {
+                navbarMenu.classList.toggle('active');
+                hamburger.classList.toggle('active');
+            });
+        
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('isLoggedIn');
+                window.location.reload();
+            });
+        });
+        sessionStorage.clear();
+        localStorage.clear();
+    </script>
 </body>
 </html>
