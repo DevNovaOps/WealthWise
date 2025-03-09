@@ -1,35 +1,37 @@
-
-
-
----
-
 Wealth-Wise 💰📊
 
-A Smart Personal Finance & Expense Tracker
+A Comprehensive Personal Finance & Expense Tracking Platform
 
 📌 Overview
 
-Wealth-Wise is a personal finance management platform designed to help users track their income, expenses, and financial goals. It offers a user-friendly interface with interactive visualizations to improve financial planning.
+Wealth-Wise is a robust financial management application designed to empower users with efficient income and expense tracking, goal setting, and insightful financial reports. The platform provides interactive visualizations, intuitive dashboards, and a seamless user experience to facilitate better financial decision-making.
 
-🚀 Features
+🌟 Key Features
 
-✔️ User Authentication – Secure signup, login, and password recovery.
-✔️ Income & Expense Management – Record and categorize transactions.
-✔️ Monthly Financial Tracking – Monitor spending and income trends.
-✔️ Currency Selection – Choose your preferred currency.
-✔️ Interactive Dashboard – Visualize financial data with charts and graphs.
-✔️ Financial Goal Tracking – Set and monitor savings goals.
-✔️ Dark Mode UI – Aesthetic design with green highlights.
+🔐 Secure Authentication – User-friendly signup, login, and password recovery mechanisms.
 
-🏗️ Tech Stack
+📊 Income & Expense Management – Effortlessly record, categorize, and analyze transactions.
+
+📅 Monthly Financial Insights – Track spending and earnings trends over time.
+
+💱 Multi-Currency Support – Choose and manage finances in your preferred currency.
+
+📈 Interactive Data Visualization – Dynamic charts and graphs for better financial understanding.
+
+🎯 Financial Goal Tracking – Set, monitor, and achieve financial milestones.
+
+🌙 Dark Mode UI – A sleek interface with green highlights for enhanced readability.
+
+
+🏗️ Technology Stack
 
 Backend: Django (Python)
 
-Database: MYSQLDB
+Database: MySQL
 
 Frontend: JavaScript, HTML, CSS
 
-Charts & Graphs: Plotly
+Visualization: Plotly
 
 
 📂 Project Structure
@@ -39,48 +41,15 @@ WealthWise/
 │── frontend/         # JavaScript, HTML, CSS  
 │── templates/        # Django templates for UI  
 │── static/           # CSS, JS, images  
-│── db.sqlite3        # SQLite database  
 │── manage.py         # Django project manager  
 │── requirements.txt  # Dependencies  
 │── README.md         # Project documentation
 
-📈 Financial Report Module
+📊 Financial Report Module
 
-The Financial Report module generates yearly insights with:
-✅ 12-month trends for income & expenses
-✅ Charts & Graphs for financial visualization
-✅ Goal Progress Tracking
+The Financial Report module provides:
+✅ Yearly financial insights based on 12 months of data.
+✅ Graphical representations of income and expense trends.
+✅ Goal tracking metrics to measure financial progress.
 
-⚡ Setup & Installation
-
-1️⃣ Clone the Repository
-
-git clone https://github.com/DevNovaOps/WealthWise.git
-cd WealthWise
-
-2️⃣ Install Dependencies
-
-pip install -r requirements.txt
-
-3️⃣ Run Migrations
-
-python manage.py migrate
-
-4️⃣ Start the Server
-
-python manage.py runserver
-
-5️⃣ Access Wealth-Wise
-
-Open http://127.0.0.1:8000/ in your browser.
-
-🔥 Contributing
-
-We welcome contributions! Fork the repo, make your changes, and submit a pull request.
-
-
-
----
-
-Let me know if you need further tweaks! 🚀
 
