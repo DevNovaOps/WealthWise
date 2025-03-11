@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wealth Wise - Login/Signup</title>
     <link rel="stylesheet" href="{% static 'signup.css' %}">
-  
 </head>
 <body>
     <div class="background">
@@ -33,9 +32,8 @@
                         </div>
                     </h1>
                 </div>
-        
-                {{ signup_form.as_p }}
-        
+                {{signup_form.as_p}}
+
                 {% if signup_form.errors %}
                     <ul class="error-list">
                         {% for field, errors in signup_form.errors.items %}

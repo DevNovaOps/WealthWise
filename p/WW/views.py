@@ -10,6 +10,8 @@ import plotly.graph_objs as go
 import plotly.io as pio    
 from django.views.decorators.cache import never_cache
 import random
+from django.utils import timezone
+from datetime import timedelta
 
 @never_cache
 def home(request):
@@ -69,7 +71,7 @@ def signup(request):
 
                 password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{8,}$'
                 if not re.match(password_regex, password):
-                    signup_form.add_error('password', 'Password must have at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character.')
+                    signup_form.add_error('password', 'Password criteria not met.')
                     error_in_criteria = True
 
                 if not error_in_criteria:
@@ -99,39 +101,46 @@ def signup(request):
     })
 
 def forgot_password(request):
-    if request.method == 'POST':
-        form = ForgotPasswordForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            try:
-                user = User.objects.get(email=email)
-                otp = str(random.randint(100000, 999999))
+        if request.method == 'POST':
+            form = ForgotPasswordForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data['email']
+                try:
+                    user = User.objects.get(email=email)
+                    otp = str(random.randint(100000, 999999))
+                    otp_expiry = timezone.now() + timedelta(minutes=1) 
 
-                request.session['reset_email'] = email
-                request.session['otp'] = otp
+                    request.session['reset_email'] = email
+                    request.session['otp'] = otp
+                    request.session['otp_expiry'] = otp_expiry.isoformat()
 
-                send_mail(
-                    'Password Reset Request',
-                    f'Dear user,\n\nWe received a request to reset your password. Your OTP for password reset is: {otp}\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nWealthwise Team',
-                    'wealthwise200@gmail.com',
-                    [email],
-                    fail_silently=False,
-                )
+                    send_mail(
+                        'Password Reset Request',
+                        f'Dear user,\n\nWe received a request to reset your password. Your OTP for password reset is: {otp}\n\nIf you did not request this, please ignore this email.\n\nNote: This OTP is valid for only 1 minute.\n\nBest regards,\nWealthwise Team',
+                        'wealthwise200@gmail.com',
+                        [email],
+                        fail_silently=False,
+                    )
 
-                return redirect('verify_otp')  
-            except User.DoesNotExist:
-                form.add_error('email', 'User does not exist.')
-    else:
-        form = ForgotPasswordForm()
+                    return redirect('verify_otp')  
+                except User.DoesNotExist:
+                    form.add_error('email', 'User does not exist.')
+        else:
+            form = ForgotPasswordForm()
 
-    return render(request, 'WW/forgot-password.html', {'forgot_password_form': form})
+        return render(request, 'WW/forgot-password.html', {'forgot_password_form': form})
 
 def verify_otp(request):
         email = request.session.get('reset_email')
         otp_sent = request.session.get('otp')
+        otp_expiry = request.session.get('otp_expiry')
 
-        if not email or not otp_sent:
+        if not email or not otp_sent or not otp_expiry:
             messages.error(request, 'Session expired. Please try again.')
+            return redirect('forgot_password')
+
+        if timezone.now() > timezone.datetime.fromisoformat(otp_expiry):
+            messages.error(request, 'OTP has expired. Please request a new one.')
             return redirect('forgot_password')
 
         if request.method == 'POST':
@@ -146,6 +155,7 @@ def verify_otp(request):
 
                     del request.session['reset_email']
                     del request.session['otp']
+                    del request.session['otp_expiry']
 
                     send_mail(
                         'Password Reset Successful',

@@ -5,25 +5,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify OTP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'forgot-password.css' %}">
+<style>
+    
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-container input {
+    width: 100%;
+    padding-right: 40px; 
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    color: gray;
+}
+
+.toggle-password:hover {
+    color: black;
+}
+</style>
 </head>
 <body>
     <div class="background">
-        <img src="{% static 'Back.jpg' %}" alt="">
+        <img src="{% static 'Back.jpg' %}" alt="Background Image">
     </div>
+    
     <div class="container">
         <div class="form-container">
             <form class="form" method="POST">
                 {% csrf_token %}
                 <h1>Verify OTP</h1>
                 <p class="description">Enter the OTP sent to your email</p>
-                {{ otp_form.as_p }}
+                
+                {{ otp_form.otp }}
+
+                <div class="password-container">
+                    {{ otp_form.new_password }}
+                    <i class="fas fa-eye toggle-password" onclick="togglePassword('id_new_password', this)"></i>
+                </div>
+
+                <div class="password-container">
+                    {{ otp_form.confirm_password }}
+                    <i class="fas fa-eye toggle-password" onclick="togglePassword('id_confirm_password', this)"></i>
+                </div>
+
                 <button type="submit">Verify & Reset Password</button>
+                
                 <div class="links">
                     <a href="{% url 'forgot_password' %}">Resend OTP</a>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+        function togglePassword(fieldId, icon) {
+            var passwordField = document.getElementById(fieldId);
+
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
 </body>
 </html>

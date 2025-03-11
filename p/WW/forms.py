@@ -6,8 +6,21 @@ class SignupForm(forms.ModelForm):
         queryset=Currency.objects.all(),
         empty_label='Select Currency',
         required=True,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'style': (
+                'background: #121212; '
+                'color: #00ff41; '
+                'border: 1px solid #00ff41; '
+                'border-radius: 5px; '
+                'box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); '
+                'scrollbar-width: thin; '
+                'scrollbar-color: #00ff41 #000000; '
+            ) 
+           } )
+            
+        )
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password1', 'placeholder': 'Enter Password'}))
     class Meta:
         model = User
         fields = ['name', 'email', 'password','currency']
@@ -41,7 +54,7 @@ class IncomeForm(forms.ModelForm):
         ('💻 Freelance', '💻 Freelance'),
         ('📈 Investments', '📈 Investments'),
         ('🏠 Rental', '🏠 Rental'),
-        ('🎁 Other', '🎁 Other')
+        ('🎁 Other', '🎁 Other'),
     ]
     
     source = forms.ChoiceField(choices=INCOME_CATEGORIES, widget=forms.Select(attrs={'class': 'form-control'}))
