@@ -24,6 +24,7 @@ jobs:
           ls -la
           find . -name "manage.py"
           find . -name "requirements.txt"
+
       - name: Install Dependencies
         run: |
           if [ -f requirements.txt ]; then
@@ -47,6 +48,12 @@ jobs:
           sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'dev@2006';"
           sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON wealthwise.* TO 'root'@'localhost';"
           sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+
+      - name: Verify Project Directory
+        run: |
+          cd p
+          ls -la
+
       - name: Set Up Django Environment
         env:
           DJANGO_SETTINGS_MODULE: p.settings
@@ -59,10 +66,11 @@ jobs:
           cd p  # Navigate to the project directory
           python manage.py migrate
           python manage.py collectstatic --noinput
+
       - name: Run Reminder Script
         env:
           EMAIL_HOST_USER: wealthwise200@gmail.com
-          EMAIL_HOST_PASSWORD: hcayuxvpkvetdcxx'
+          EMAIL_HOST_PASSWORD: hcayuxvpkvetdcxx
         run: |
           cd p  
           python reminder.py    
