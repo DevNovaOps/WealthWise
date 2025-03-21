@@ -27,12 +27,13 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           else
             pip install django mysqlclient django-tailwind plotly
           fi
-          
+
       - name: Debug installed packages
         run: pip list
 
@@ -44,33 +45,31 @@ jobs:
           MYSQL_ROOT_PASSWORD: "root"  # Default root password for MySQL in GitHub Actions
         run: |
           sudo systemctl start mysql
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS wealthwise;"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'dev@2006';"
-          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON wealthwise.* TO 'root'@'localhost';"
+          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+          sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
           sudo mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
-
-      - name: Verify Project Directory
-        run: |
-          cd p
-          ls -la
 
       - name: Set Up Django Environment
         env:
-          DJANGO_SETTINGS_MODULE: p.settings
+          DJANGO_SETTINGS_MODULE: wealthwise.settings  # Update with your actual Django project name
           DATABASE_NAME: wealthwise
           DATABASE_USER: root
           DATABASE_PASSWORD: dev@2006
           DATABASE_HOST: localhost
           DATABASE_PORT: 3306
         run: |
-          cd p  # Navigate to the project directory
+          PROJECT_DIR=$(find . -name "manage.py" -exec dirname {} \;)
+          cd $PROJECT_DIR
           python manage.py migrate
           python manage.py collectstatic --noinput
 
       - name: Run Reminder Script
         env:
           EMAIL_HOST_USER: wealthwise200@gmail.com
-          EMAIL_HOST_PASSWORD: hcayuxvpkvetdcxx
+          EMAIL_HOST_PASSWORD: hcayuxvpkvetdcxx  # Remove extra `'` in your original script
         run: |
-          cd p  
-          python reminder.py    
+          PROJECT_DIR=$(find . -name "manage.py" -exec dirname {} \;)
+          cd $PROJECT_DIR
+          python reminder.py
+  
